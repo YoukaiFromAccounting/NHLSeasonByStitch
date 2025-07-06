@@ -1,0 +1,51 @@
+game_id,date,season,start_time_utc,game_state,game_type,venue,attendance,home_team_code,away_team_code,home_team_name,away_team_name,home_team,away_team,home_score,away_score,home_penalties,away_penalties,first_goal,home_comeback,away_comeback,overtime,shootout,home_shots,away_shots
+2023010007,2023-09-24,20232024,2023-09-24T18:00:00Z,FINAL,1,Canadian Tire Centre,,OTT,TOR,Senators,Maple Leafs,OTT,TOR,3,2,8,4,home,False,False,False,False,32,38
+2023010019,2023-09-25,20232024,2023-09-25T23:00:00Z,FINAL,1,Scotiabank Arena,,TOR,OTT,Maple Leafs,Senators,TOR,OTT,3,4,7,8,away,False,False,True,False,39,39
+2023010032,2023-09-27,20232024,2023-09-27T22:30:00Z,FINAL,1,Joe Thornton Community Centre,,TOR,BUF,Maple Leafs,Sabres,TOR,BUF,5,2,2,4,home,False,False,False,False,40,15
+2023010051,2023-09-29,20232024,2023-09-29T23:00:00Z,FINAL,1,Centre Bell,,MTL,TOR,Canadiens,Maple Leafs,MTL,TOR,1,2,4,10,away,False,False,False,False,25,26
+2023010061,2023-09-30,20232024,2023-09-30T23:00:00Z,FINAL,1,Centre Bell,,MTL,TOR,Canadiens,Maple Leafs,MTL,TOR,1,3,7,7,away,False,False,False,False,34,22
+2023010071,2023-10-02,20232024,2023-10-02T23:00:00Z,FINAL,1,Scotiabank Arena,,TOR,MTL,Maple Leafs,Canadiens,TOR,MTL,4,5,7,10,away,False,True,True,False,29,26
+2023010098,2023-10-05,20232024,2023-10-05T23:00:00Z,FINAL,1,Scotiabank Arena,,TOR,DET,Maple Leafs,Red Wings,TOR,DET,4,3,9,8,home,False,False,True,False,38,23
+2023010110,2023-10-07,20232024,2023-10-07T23:00:00Z,FINAL,1,Little Caesars Arena,,DET,TOR,Red Wings,Maple Leafs,DET,TOR,4,3,7,6,away,True,False,False,False,32,24
+2023020005,2023-10-11,20232024,2023-10-11T23:00:00Z,OFF,2,Scotiabank Arena,,TOR,MTL,Maple Leafs,Canadiens,TOR,MTL,6,5,10,9,away,True,False,True,False,42,24
+2023020026,2023-10-14,20232024,2023-10-14T23:00:00Z,OFF,2,Scotiabank Arena,,TOR,MIN,Maple Leafs,Wild,TOR,MIN,7,4,4,6,away,False,False,False,False,33,32
+2023020038,2023-10-16,20232024,2023-10-16T23:00:00Z,OFF,2,Scotiabank Arena,,TOR,CHI,Maple Leafs,Blackhawks,TOR,CHI,1,4,6,5,away,False,False,False,False,36,31
+2023020052,2023-10-19,20232024,2023-10-19T23:00:00Z,OFF,2,Amerant Bank Arena,,FLA,TOR,Panthers,Maple Leafs,FLA,TOR,3,1,10,8,home,False,False,False,False,24,30
+2023020070,2023-10-21,20232024,2023-10-21T23:00:00Z,OFF,2,Amalie Arena,,TBL,TOR,Lightning,Maple Leafs,TBL,TOR,3,4,2,5,away,False,True,True,False,31,52
+2023020083,2023-10-24,20232024,2023-10-24T22:00:00Z,OFF,2,Capital One Arena,,WSH,TOR,Capitals,Maple Leafs,WSH,TOR,1,4,4,6,away,False,False,False,False,38,17
+2023020108,2023-10-26,20232024,2023-10-27T00:00:00Z,OFF,2,American Airlines Center,,DAL,TOR,Stars,Maple Leafs,DAL,TOR,1,4,4,2,away,False,False,False,False,32,24
+2023020122,2023-10-28,20232024,2023-10-28T23:00:00Z,OFF,2,Bridgestone Arena,,NSH,TOR,Predators,Maple Leafs,NSH,TOR,3,2,5,6,away,False,False,True,False,24,35
+2023020139,2023-10-31,20232024,2023-11-01T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,LAK,Maple Leafs,Kings,TOR,LAK,1,4,8,8,away,False,False,False,False,30,27
+2023020145,2023-11-02,20232024,2023-11-02T23:30:00Z,OFF,2,TD Garden,,BOS,TOR,Bruins,Maple Leafs,BOS,TOR,3,2,3,3,home,False,False,True,False,40,35
+2023020165,2023-11-04,20232024,2023-11-04T23:00:00Z,OFF,2,Scotiabank Arena,,TOR,BUF,Maple Leafs,Sabres,TOR,BUF,4,6,4,5,home,False,False,False,False,28,41
+2023020177,2023-11-06,20232024,2023-11-07T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,TBL,Maple Leafs,Lightning,TOR,TBL,6,5,5,4,home,True,False,True,False,34,31
+2023020190,2023-11-08,20232024,2023-11-09T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,OTT,Maple Leafs,Senators,TOR,OTT,3,6,6,5,home,False,False,False,False,30,31
+2023020207,2023-11-10,20232024,2023-11-11T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,CGY,Maple Leafs,Flames,TOR,CGY,5,4,4,2,home,False,False,True,False,36,28
+2023020215,2023-11-11,20232024,2023-11-12T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,VAN,Maple Leafs,Canucks,TOR,VAN,5,2,12,5,away,False,False,False,False,22,33
+2023020251,2023-11-17,20232024,2023-11-17T19:00:00Z,OFF,2,Avicii Arena,,DET,TOR,Red Wings,Maple Leafs,DET,TOR,2,3,7,8,home,False,True,False,False,29,29
+2023020267,2023-11-19,20232024,2023-11-19T13:00:00Z,OFF,2,Avicii Arena,,MIN,TOR,Wild,Maple Leafs,MIN,TOR,3,4,3,4,home,False,False,True,False,36,25
+2023020295,2023-11-24,20232024,2023-11-24T19:00:00Z,OFF,2,United Center,,CHI,TOR,Blackhawks,Maple Leafs,CHI,TOR,4,3,6,5,away,True,False,True,False,34,37
+2023020311,2023-11-25,20232024,2023-11-26T00:00:00Z,OFF,2,PPG Paints Arena,,PIT,TOR,Penguins,Maple Leafs,PIT,TOR,3,2,6,5,away,False,False,False,False,35,33
+2023020329,2023-11-28,20232024,2023-11-29T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,FLA,Maple Leafs,Panthers,TOR,FLA,2,1,7,10,away,False,False,True,False,32,39
+2023020346,2023-11-30,20232024,2023-12-01T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,SEA,Maple Leafs,Kraken,TOR,SEA,4,3,10,7,home,False,False,True,False,28,40
+2023020364,2023-12-02,20232024,2023-12-03T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,BOS,Maple Leafs,Bruins,TOR,BOS,3,4,2,2,away,False,False,True,False,40,37
+2023020395,2023-12-07,20232024,2023-12-08T00:00:00Z,OFF,2,Canadian Tire Centre,,OTT,TOR,Senators,Maple Leafs,OTT,TOR,3,4,1,2,home,False,False,False,False,41,22
+2023020413,2023-12-09,20232024,2023-12-10T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,NSH,Maple Leafs,Predators,TOR,NSH,4,0,6,11,home,False,False,False,False,37,18
+2023020429,2023-12-11,20232024,2023-12-12T00:00:00Z,OFF,2,UBS Arena,,NYI,TOR,Islanders,Maple Leafs,NYI,TOR,4,3,1,1,away,False,False,True,False,29,40
+2023020432,2023-12-12,20232024,2023-12-13T00:00:00Z,OFF,2,Madison Square Garden,,NYR,TOR,Rangers,Maple Leafs,NYR,TOR,3,7,7,6,away,False,False,False,False,31,30
+2023020449,2023-12-14,20232024,2023-12-15T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,CBJ,Maple Leafs,Blue Jackets,TOR,CBJ,5,6,6,5,away,False,False,True,False,48,35
+2023020466,2023-12-16,20232024,2023-12-17T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,PIT,Maple Leafs,Penguins,TOR,PIT,7,0,9,16,home,False,False,False,False,35,38
+2023020489,2023-12-19,20232024,2023-12-20T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,NYR,Maple Leafs,Rangers,TOR,NYR,2,5,4,0,away,False,False,False,False,33,36
+2023020498,2023-12-21,20232024,2023-12-22T00:00:00Z,OFF,2,KeyBank Center,,BUF,TOR,Sabres,Maple Leafs,BUF,TOR,9,3,5,8,home,False,False,False,False,34,27
+2023020517,2023-12-23,20232024,2023-12-24T00:00:00Z,OFF,2,Nationwide Arena,,CBJ,TOR,Blue Jackets,Maple Leafs,CBJ,TOR,1,4,4,7,away,False,False,False,False,28,30
+2023020531,2023-12-27,20232024,2023-12-28T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,OTT,Maple Leafs,Senators,TOR,OTT,2,4,3,7,home,False,True,False,False,36,30
+2023020546,2023-12-29,20232024,2023-12-30T00:00:00Z,OFF,2,Nationwide Arena,,CBJ,TOR,Blue Jackets,Maple Leafs,CBJ,TOR,6,5,7,4,away,True,False,True,False,21,33
+2023020561,2023-12-30,20232024,2023-12-31T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,CAR,Maple Leafs,Hurricanes,TOR,CAR,2,3,8,7,away,False,False,False,False,27,28
+2023020585,2024-01-02,20232024,2024-01-03T03:30:00Z,OFF,2,Crypto.com Arena,,LAK,TOR,Kings,Maple Leafs,LAK,TOR,0,3,7,4,away,False,False,False,False,31,29
+2023020588,2024-01-03,20232024,2024-01-04T02:00:00Z,OFF,2,Honda Center,,ANA,TOR,Ducks,Maple Leafs,ANA,TOR,1,2,12,5,home,False,False,True,False,28,57
+2023020613,2024-01-06,20232024,2024-01-07T00:00:00Z,OFF,2,SAP Center at San Jose,,SJS,TOR,Sharks,Maple Leafs,SJS,TOR,1,4,3,0,away,False,False,False,False,24,32
+2023020627,2024-01-09,20232024,2024-01-10T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,SJS,Maple Leafs,Sharks,TOR,SJS,7,1,2,3,home,False,False,False,False,46,23
+2023020646,2024-01-11,20232024,2024-01-12T00:00:00Z,OFF,2,UBS Arena,,NYI,TOR,Islanders,Maple Leafs,NYI,TOR,4,3,1,4,home,True,False,True,False,30,35
+2023020662,2024-01-13,20232024,2024-01-14T00:00:00Z,OFF,2,Scotiabank Arena,,TOR,COL,Maple Leafs,Avalanche,TOR,COL,3,5,8,2,home,False,True,False,False,29,33
+2023020670,2024-01-14,20232024,2024-01-15T00:30:00Z,OFF,2,Scotiabank Arena,,TOR,DET,Maple Leafs,Red Wings,TOR,DET,2,4,4,6,home,False,False,False,False,30,24
+2023020688,2024-01-16,20232024,2024-01-17T02:00:00Z,OFF,2,Rogers Place,,EDM,TOR,Oilers,Maple Leafs,EDM,TOR,4,2,2,2,away,True,False,False,False,32,27
