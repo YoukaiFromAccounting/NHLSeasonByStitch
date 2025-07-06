@@ -190,7 +190,7 @@
         }
 
         .scarf-stripe {
-            height: 10px;
+            height: 8px;
             transition: transform 0.2s;
             cursor: pointer;
             position: relative;
@@ -363,14 +363,87 @@
         let teams = new Set();
         let seasons = new Set();
 
-        // Color scheme for different game outcomes
-        const colors = {
-            win: '#2ecc71',
-            loss: '#e74c3c',
-            otWin: '#f39c12',
-            otLoss: '#95a5a6',
-            preseason: '#9b59b6'
+        // Team color palettes - primary and secondary colors for each team
+        const teamColors = {
+            'ANA': { primary: '#F47A38', secondary: '#B09862' },
+            'BOS': { primary: '#FFB81C', secondary: '#000000' },
+            'BUF': { primary: '#003087', secondary: '#FFB81C' },
+            'CGY': { primary: '#C8102E', secondary: '#F1BE48' },
+            'CAR': { primary: '#CC0000', secondary: '#000000' },
+            'CHI': { primary: '#CF0A2C', secondary: '#000000' },
+            'COL': { primary: '#6F263D', secondary: '#236192' },
+            'CBJ': { primary: '#002654', secondary: '#CE1126' },
+            'DAL': { primary: '#006847', secondary: '#8F8F8C' },
+            'DET': { primary: '#CE1126', secondary: '#FFFFFF' },
+            'EDM': { primary: '#041E42', secondary: '#FF4C00' },
+            'FLA': { primary: '#041E42', secondary: '#C8102E' },
+            'LAK': { primary: '#111111', secondary: '#A2AAAD' },
+            'MIN': { primary: '#A6192E', secondary: '#154734' },
+            'MTL': { primary: '#AF1E2D', secondary: '#192168' },
+            'NSH': { primary: '#FFB81C', secondary: '#041E42' },
+            'NJD': { primary: '#CE1126', secondary: '#000000' },
+            'NYI': { primary: '#00539B', secondary: '#F47D30' },
+            'NYR': { primary: '#0038A8', secondary: '#CE1126' },
+            'OTT': { primary: '#C52032', secondary: '#000000' },
+            'PHI': { primary: '#F74902', secondary: '#000000' },
+            'PIT': { primary: '#FFB81C', secondary: '#000000' },
+            'SJS': { primary: '#006D75', secondary: '#EA7200' },
+            'STL': { primary: '#002F87', secondary: '#FCB514' },
+            'TBL': { primary: '#002868', secondary: '#FFFFFF' },
+            'TOR': { primary: '#003E7E', secondary: '#FFFFFF' },
+            'VAN': { primary: '#001F5B', secondary: '#00843D' },
+            'VGK': { primary: '#B4975A', secondary: '#333F42' },
+            'WSH': { primary: '#C8102E', secondary: '#041E42' },
+            'WPG': { primary: '#041E42', secondary: '#004C97' },
+            'ARI': { primary: '#8C2633', secondary: '#E2D6B5' },
+            'SEA': { primary: '#99D9D9', secondary: '#001628' },
+            'UTA': { primary: '#6CACE4', secondary: '#000000' }
         };
+
+        // Function to get team-specific color scheme
+        function getTeamColorScheme(teamCode) {
+            const team = teamColors[teamCode];
+            if (!team) {
+                // Default fallback colors
+                return {
+                    win: '#2ecc71',
+                    loss: '#e74c3c',
+                    otWin: '#27ae60',
+                    otLoss: '#c0392b',
+                    preseason: '#9b59b6'
+                };
+            }
+
+            return {
+                win: team.primary,
+                loss: team.secondary,
+                otWin: adjustColorBrightness(team.primary, -20), // Slightly dimmer
+                otLoss: adjustColorBrightness(team.secondary, -20), // Slightly dimmer
+                preseason: '#9b59b6' // Keep purple for preseason
+            };
+        }
+
+        // Function to adjust color brightness
+        function adjustColorBrightness(hex, percent) {
+            // Remove # if present
+            hex = hex.replace('#', '');
+            
+            // Convert to RGB
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            
+            // Adjust brightness
+            const newR = Math.max(0, Math.min(255, r + (r * percent / 100)));
+            const newG = Math.max(0, Math.min(255, g + (g * percent / 100)));
+            const newB = Math.max(0, Math.min(255, b + (b * percent / 100)));
+            
+            // Convert back to hex
+            return '#' + 
+                Math.round(newR).toString(16).padStart(2, '0') +
+                Math.round(newG).toString(16).padStart(2, '0') +
+                Math.round(newB).toString(16).padStart(2, '0');
+        }
 
         // Team ID mapping for logo URLs
         const teamIds = {
@@ -580,6 +653,9 @@
             // Create floating logos for the selected team
             createFloatingLogos(selectedTeam);
 
+            // Get team-specific color scheme
+            const teamColorScheme = getTeamColorScheme(selectedTeam);
+
             // Filter games for selected team and season
             const teamGames = gameData.filter(game => 
                 game.season === selectedSeason && 
@@ -609,22 +685,22 @@
 
                 let color;
                 if (isPreseason) {
-                    color = colors.preseason;
+                    color = teamColorScheme.preseason;
                     preseason++;
                 } else if (isWin) {
                     if (isOvertime) {
-                        color = colors.otWin;
+                        color = teamColorScheme.otWin;
                         otWins++;
                     } else {
-                        color = colors.win;
+                        color = teamColorScheme.win;
                         wins++;
                     }
                 } else {
                     if (isOvertime) {
-                        color = colors.otLoss;
+                        color = teamColorScheme.otLoss;
                         otLosses++;
                     } else {
-                        color = colors.loss;
+                        color = teamColorScheme.loss;
                         losses++;
                     }
                 }
@@ -652,7 +728,32 @@
                 scarfElement.appendChild(stripe);
             });
 
-            updateStats(wins, losses, otWins, otLosses, preseason, teamGames.length);
+        function updateLegend(teamCode) {
+            const teamColorScheme = getTeamColorScheme(teamCode);
+            const legend = document.querySelector('.legend');
+            
+            legend.innerHTML = `
+                <div class="legend-item">
+                    <div class="legend-color" style="background: ${teamColorScheme.win};"></div>
+                    <span>Win</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: ${teamColorScheme.loss};"></div>
+                    <span>Loss</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: ${teamColorScheme.otWin};"></div>
+                    <span>OT/SO Win</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: ${teamColorScheme.otLoss};"></div>
+                    <span>OT/SO Loss</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: ${teamColorScheme.preseason};"></div>
+                    <span>Preseason</span>
+                </div>
+            `;
         }
 
         function updateStats(wins, losses, otWins, otLosses, preseason, total) {
