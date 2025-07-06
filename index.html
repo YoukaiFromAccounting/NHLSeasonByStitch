@@ -226,9 +226,16 @@
         
         <div class="controls">
             <div class="control-group">
+                <label for="seasonSelect">Select Season:</label>
+                <select id="seasonSelect">
+                    <option value="">Loading seasons...</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
                 <label for="teamSelect">Select Team:</label>
                 <select id="teamSelect">
-                    <option value="">Loading teams...</option>
+                    <option value="">Choose a season first...</option>
                 </select>
             </div>
             
@@ -275,7 +282,7 @@
         <div class="stats" id="stats"></div>
 
         <div class="info-text">
-            <p>Select a team to generate their 2023-24 season scarf!</p>
+            <p>Select a season and team to generate their season scarf!</p>
             <p>Each stripe represents one game - hover over stripes to see game details.</p>
         </div>
     </div>
@@ -286,6 +293,7 @@
     <script>
         let gameData = [];
         let teams = new Set();
+        let seasons = new Set();
 
         // Color scheme for different game outcomes
         const colors = {
@@ -316,7 +324,7 @@
                         header: true,
                         complete: function(results) {
                             gameData = results.data.filter(row => row.game_id); // Filter out empty rows
-                            populateTeamSelect();
+                            populateSeasonSelect();
                             console.log('Data loaded:', gameData.length, 'games');
                         },
                         error: function(error) {
@@ -332,8 +340,8 @@
         }
 
         function showError(message) {
-            const teamSelect = document.getElementById('teamSelect');
-            teamSelect.innerHTML = '<option value="">Error loading data</option>';
+            const seasonSelect = document.getElementById('seasonSelect');
+            seasonSelect.innerHTML = '<option value="">Error loading data</option>';
             
             const errorDiv = document.createElement('div');
             errorDiv.style.cssText = 'background: #e74c3c; color: white; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;';
@@ -343,13 +351,69 @@
             container.insertBefore(errorDiv, container.querySelector('.controls').nextSibling);
         }
 
+        function populateSeasonSelect() {
+            seasons.clear();
+            const seasonSelect = document.getElementById('seasonSelect');
+            seasonSelect.innerHTML = '<option value="">Choose a season...</option>';
+
+            // Extract unique seasons and format them nicely
+            gameData.forEach(game => {
+                if (game.season) {
+                    seasons.add(game.season);
+                }
+            });
+
+            // Sort seasons in descending order (most recent first)
+            const sortedSeasons = Array.from(seasons).sort().reverse();
+            
+            sortedSeasons.forEach(season => {
+                const option = document.createElement('option');
+                option.value = season;
+                // Format season display (20232024 -> 2023-24)
+                const displaySeason = formatSeasonDisplay(season);
+                option.textContent = displaySeason;
+                seasonSelect.appendChild(option);
+            });
+
+            // Add change event listener
+            seasonSelect.addEventListener('change', function() {
+                populateTeamSelect();
+            });
+
+            // Auto-select first season if only one is available
+            if (sortedSeasons.length === 1) {
+                seasonSelect.value = sortedSeasons[0];
+                populateTeamSelect();
+            }
+        }
+
+        function formatSeasonDisplay(season) {
+            // Convert 20232024 to 2023-24
+            if (season && season.length === 8) {
+                const startYear = season.substring(0, 4);
+                const endYear = season.substring(6, 8);
+                return `${startYear}-${endYear}`;
+            }
+            return season;
+        }
+
         function populateTeamSelect() {
+            const selectedSeason = document.getElementById('seasonSelect').value;
+            
+            if (!selectedSeason) {
+                const teamSelect = document.getElementById('teamSelect');
+                teamSelect.innerHTML = '<option value="">Choose a season first...</option>';
+                return;
+            }
+
             teams.clear();
             const teamSelect = document.getElementById('teamSelect');
             teamSelect.innerHTML = '<option value="">Choose a team...</option>';
 
-            // Extract unique teams
-            gameData.forEach(game => {
+            // Extract unique teams for the selected season
+            const seasonGames = gameData.filter(game => game.season === selectedSeason);
+            
+            seasonGames.forEach(game => {
                 if (game.home_team_code) teams.add(game.home_team_code);
                 if (game.away_team_code) teams.add(game.away_team_code);
             });
@@ -362,11 +426,19 @@
                 option.textContent = team;
                 teamSelect.appendChild(option);
             });
+
+            console.log(`Found ${sortedTeams.length} teams for season ${formatSeasonDisplay(selectedSeason)}`);
         }
 
         function generateScarf() {
             const selectedTeam = document.getElementById('teamSelect').value;
+            const selectedSeason = document.getElementById('seasonSelect').value;
             const scarfWidth = document.getElementById('scarfWidth').value;
+            
+            if (!selectedSeason) {
+                alert('Please select a season first!');
+                return;
+            }
             
             if (!selectedTeam) {
                 alert('Please select a team first!');
@@ -378,9 +450,10 @@
                 return;
             }
 
-            // Filter games for selected team
+            // Filter games for selected team and season
             const teamGames = gameData.filter(game => 
-                game.home_team_code === selectedTeam || game.away_team_code === selectedTeam
+                game.season === selectedSeason && 
+                (game.home_team_code === selectedTeam || game.away_team_code === selectedTeam)
             );
 
             // Sort games by date
