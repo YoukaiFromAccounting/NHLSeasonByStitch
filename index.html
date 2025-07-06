@@ -204,6 +204,8 @@
             pointer-events: none;
             z-index: 1000;
             display: none;
+            max-width: 300px;
+            line-height: 1.4;
         }
 
         @media (max-width: 768px) {
@@ -222,7 +224,7 @@
 <body>
     <div class="container">
         <h1>🏒 NHL Season Scarf Generator</h1>
-        <p class="subtitle">Transform your team's season into a beautiful visual scarf</p>
+        <p class="subtitle">Transform your team's season into a beautiful visual scarf (1994-2025)</p>
         
         <div class="controls">
             <div class="control-group">
@@ -283,7 +285,7 @@
 
         <div class="info-text">
             <p>Select a season and team to generate their season scarf!</p>
-            <p>Each stripe represents one game - hover over stripes to see game details.</p>
+            <p>Each stripe represents one game - hover over stripes to see game details including shots.</p>
         </div>
     </div>
 
@@ -310,7 +312,7 @@
         });
 
         function loadDataFromGitHub() {
-            const csvUrl = 'nhl_results_caudate.csv'; // This will be relative to your GitHub Pages site
+            const csvUrl = 'nhl_complete_1994_2025.csv'; // Updated filename
             
             fetch(csvUrl)
                 .then(response => {
@@ -388,7 +390,7 @@
         }
 
         function formatSeasonDisplay(season) {
-            // Convert 20232024 to 2023-24
+            // Convert 19941995 to 1994-95
             if (season && season.length === 8) {
                 const startYear = season.substring(0, 4);
                 const endYear = season.substring(6, 8);
@@ -503,15 +505,21 @@
 
                 stripe.style.backgroundColor = color;
                 
-                // Add hover tooltip
+                // Add hover tooltip with enhanced information including shots
                 const opponent = isHome ? game.away_team_code : game.home_team_code;
                 const venue = isHome ? 'vs' : '@';
                 const score = `${teamScore}-${opponentScore}`;
                 const gameDate = new Date(game.date).toLocaleDateString();
                 
-                stripe.setAttribute('data-tooltip', 
-                    `${gameDate} ${venue} ${opponent} ${score}${isOvertime ? ' (OT/SO)' : ''}${isPreseason ? ' (Preseason)' : ''}`
-                );
+                // Get shots data - handle cases where shots might be missing
+                const teamShots = isHome ? (game.home_shots || 'N/A') : (game.away_shots || 'N/A');
+                const opponentShots = isHome ? (game.away_shots || 'N/A') : (game.home_shots || 'N/A');
+                const shotsInfo = teamShots !== 'N/A' && opponentShots !== 'N/A' ? 
+                    `\nShots: ${teamShots}-${opponentShots}` : '';
+                
+                const tooltipText = `${gameDate} ${venue} ${opponent} ${score}${isOvertime ? ' (OT/SO)' : ''}${isPreseason ? ' (Preseason)' : ''}${shotsInfo}`;
+                
+                stripe.setAttribute('data-tooltip', tooltipText);
 
                 stripe.addEventListener('mouseenter', showTooltip);
                 stripe.addEventListener('mouseleave', hideTooltip);
