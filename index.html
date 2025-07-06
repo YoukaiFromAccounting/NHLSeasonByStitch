@@ -16,7 +16,6 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
-            overflow-x: hidden;
         }
 
         .container {
@@ -27,61 +26,6 @@
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Animated background logos */
-        .logo-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            z-index: 1;
-            overflow: hidden;
-        }
-
-        .floating-logo {
-            position: absolute;
-            opacity: 0.08;
-            animation: float 15s infinite ease-in-out;
-            filter: blur(0.5px);
-        }
-
-        .floating-logo img {
-            width: 120px;
-            height: 120px;
-            object-fit: contain;
-        }
-
-        @keyframes float {
-            0%, 100% { 
-                transform: translate(0, 0) rotate(0deg) scale(1);
-            }
-            25% { 
-                transform: translate(30px, -20px) rotate(5deg) scale(1.1);
-            }
-            50% { 
-                transform: translate(-20px, 30px) rotate(-3deg) scale(0.9);
-            }
-            75% { 
-                transform: translate(40px, 10px) rotate(8deg) scale(1.05);
-            }
-        }
-
-        /* Stagger animation delays */
-        .floating-logo:nth-child(1) { animation-delay: 0s; }
-        .floating-logo:nth-child(2) { animation-delay: 3s; }
-        .floating-logo:nth-child(3) { animation-delay: 6s; }
-        .floating-logo:nth-child(4) { animation-delay: 9s; }
-        .floating-logo:nth-child(5) { animation-delay: 12s; }
-
-        /* Content needs to be above the background */
-        .content {
-            position: relative;
-            z-index: 2;
         }
 
         h1 {
@@ -186,7 +130,6 @@
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             max-width: 100%;
-            position: relative;
         }
 
         .scarf-stripe {
@@ -275,83 +218,74 @@
                 flex-direction: column;
                 gap: 10px;
             }
-
-            .floating-logo img {
-                width: 80px;
-                height: 80px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo-background" id="logoBackground"></div>
+        <h1>🏒 NHL Season Scarf Generator</h1>
+        <p class="subtitle">Transform your team's season into a beautiful visual scarf (1994-2025)</p>
         
-        <div class="content">
-            <h1>🏒 NHL Season Scarf Generator</h1>
-            <p class="subtitle">Transform your team's season into a beautiful visual scarf (1994-2025)</p>
+        <div class="controls">
+            <div class="control-group">
+                <label for="seasonSelect">Select Season:</label>
+                <select id="seasonSelect">
+                    <option value="">Loading seasons...</option>
+                </select>
+            </div>
             
-            <div class="controls">
-                <div class="control-group">
-                    <label for="seasonSelect">Select Season:</label>
-                    <select id="seasonSelect">
-                        <option value="">Loading seasons...</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <label for="teamSelect">Select Team:</label>
-                    <select id="teamSelect">
-                        <option value="">Choose a season first...</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <label for="scarfWidth">Scarf Width:</label>
-                    <select id="scarfWidth">
-                        <option value="300">Narrow (300px)</option>
-                        <option value="500" selected>Medium (500px)</option>
-                        <option value="700">Wide (700px)</option>
-                        <option value="900">Extra Wide (900px)</option>
-                    </select>
-                </div>
-                
-                <button onclick="generateScarf()">Generate Scarf</button>
+            <div class="control-group">
+                <label for="teamSelect">Select Team:</label>
+                <select id="teamSelect">
+                    <option value="">Choose a season first...</option>
+                </select>
             </div>
-
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #2ecc71;"></div>
-                    <span>Win</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #e74c3c;"></div>
-                    <span>Loss</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #f39c12;"></div>
-                    <span>OT/SO Win</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #95a5a6;"></div>
-                    <span>OT/SO Loss</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #9b59b6;"></div>
-                    <span>Preseason</span>
-                </div>
+            
+            <div class="control-group">
+                <label for="scarfWidth">Scarf Width:</label>
+                <select id="scarfWidth">
+                    <option value="300">Narrow (300px)</option>
+                    <option value="500" selected>Medium (500px)</option>
+                    <option value="700">Wide (700px)</option>
+                    <option value="900">Extra Wide (900px)</option>
+                </select>
             </div>
+            
+            <button onclick="generateScarf()">Generate Scarf</button>
+        </div>
 
-            <div class="scarf-container">
-                <div id="scarf" class="scarf"></div>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #2ecc71;"></div>
+                <span>Win</span>
             </div>
-
-            <div class="stats" id="stats"></div>
-
-            <div class="info-text">
-                <p>Select a season and team to generate their season scarf!</p>
-                <p>Each stripe represents one game - hover over stripes to see game details including shots.</p>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #e74c3c;"></div>
+                <span>Loss</span>
             </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f39c12;"></div>
+                <span>OT/SO Win</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #95a5a6;"></div>
+                <span>OT/SO Loss</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #9b59b6;"></div>
+                <span>Preseason</span>
+            </div>
+        </div>
+
+        <div class="scarf-container">
+            <div id="scarf" class="scarf"></div>
+        </div>
+
+        <div class="stats" id="stats"></div>
+
+        <div class="info-text">
+            <p>Select a season and team to generate their season scarf!</p>
+            <p>Each stripe represents one game - hover over stripes to see game details including shots.</p>
         </div>
     </div>
 
@@ -363,96 +297,13 @@
         let teams = new Set();
         let seasons = new Set();
 
-        // Team color palettes - primary and secondary colors for each team
-        const teamColors = {
-            'ANA': { primary: '#F47A38', secondary: '#B09862' },
-            'BOS': { primary: '#FFB81C', secondary: '#000000' },
-            'BUF': { primary: '#003087', secondary: '#FFB81C' },
-            'CGY': { primary: '#C8102E', secondary: '#F1BE48' },
-            'CAR': { primary: '#CC0000', secondary: '#000000' },
-            'CHI': { primary: '#CF0A2C', secondary: '#000000' },
-            'COL': { primary: '#6F263D', secondary: '#236192' },
-            'CBJ': { primary: '#002654', secondary: '#CE1126' },
-            'DAL': { primary: '#006847', secondary: '#8F8F8C' },
-            'DET': { primary: '#CE1126', secondary: '#FFFFFF' },
-            'EDM': { primary: '#041E42', secondary: '#FF4C00' },
-            'FLA': { primary: '#041E42', secondary: '#C8102E' },
-            'LAK': { primary: '#111111', secondary: '#A2AAAD' },
-            'MIN': { primary: '#A6192E', secondary: '#154734' },
-            'MTL': { primary: '#AF1E2D', secondary: '#192168' },
-            'NSH': { primary: '#FFB81C', secondary: '#041E42' },
-            'NJD': { primary: '#CE1126', secondary: '#000000' },
-            'NYI': { primary: '#00539B', secondary: '#F47D30' },
-            'NYR': { primary: '#0038A8', secondary: '#CE1126' },
-            'OTT': { primary: '#C52032', secondary: '#000000' },
-            'PHI': { primary: '#F74902', secondary: '#000000' },
-            'PIT': { primary: '#FFB81C', secondary: '#000000' },
-            'SJS': { primary: '#006D75', secondary: '#EA7200' },
-            'STL': { primary: '#002F87', secondary: '#FCB514' },
-            'TBL': { primary: '#002868', secondary: '#FFFFFF' },
-            'TOR': { primary: '#003E7E', secondary: '#FFFFFF' },
-            'VAN': { primary: '#001F5B', secondary: '#00843D' },
-            'VGK': { primary: '#B4975A', secondary: '#333F42' },
-            'WSH': { primary: '#C8102E', secondary: '#041E42' },
-            'WPG': { primary: '#041E42', secondary: '#004C97' },
-            'ARI': { primary: '#8C2633', secondary: '#E2D6B5' },
-            'SEA': { primary: '#99D9D9', secondary: '#001628' },
-            'UTA': { primary: '#6CACE4', secondary: '#000000' }
-        };
-
-        // Function to get team-specific color scheme
-        function getTeamColorScheme(teamCode) {
-            const team = teamColors[teamCode];
-            if (!team) {
-                // Default fallback colors
-                return {
-                    win: '#2ecc71',
-                    loss: '#e74c3c',
-                    otWin: '#27ae60',
-                    otLoss: '#c0392b',
-                    preseason: '#9b59b6'
-                };
-            }
-
-            return {
-                win: team.primary,
-                loss: team.secondary,
-                otWin: adjustColorBrightness(team.primary, -20), // Slightly dimmer
-                otLoss: adjustColorBrightness(team.secondary, -20), // Slightly dimmer
-                preseason: '#9b59b6' // Keep purple for preseason
-            };
-        }
-
-        // Function to adjust color brightness
-        function adjustColorBrightness(hex, percent) {
-            // Remove # if present
-            hex = hex.replace('#', '');
-            
-            // Convert to RGB
-            const r = parseInt(hex.substr(0, 2), 16);
-            const g = parseInt(hex.substr(2, 2), 16);
-            const b = parseInt(hex.substr(4, 2), 16);
-            
-            // Adjust brightness
-            const newR = Math.max(0, Math.min(255, r + (r * percent / 100)));
-            const newG = Math.max(0, Math.min(255, g + (g * percent / 100)));
-            const newB = Math.max(0, Math.min(255, b + (b * percent / 100)));
-            
-            // Convert back to hex
-            return '#' + 
-                Math.round(newR).toString(16).padStart(2, '0') +
-                Math.round(newG).toString(16).padStart(2, '0') +
-                Math.round(newB).toString(16).padStart(2, '0');
-        }
-
-        // Team ID mapping for logo URLs
-        const teamIds = {
-            'ANA': 24, 'BOS': 6, 'BUF': 7, 'CGY': 20, 'CAR': 12, 'CHI': 16,
-            'COL': 21, 'CBJ': 29, 'DAL': 25, 'DET': 17, 'EDM': 22, 'FLA': 13,
-            'LAK': 26, 'MIN': 30, 'MTL': 8, 'NSH': 18, 'NJD': 1, 'NYI': 2,
-            'NYR': 3, 'OTT': 9, 'PHI': 4, 'PIT': 5, 'SJS': 28, 'STL': 19,
-            'TBL': 14, 'TOR': 10, 'VAN': 23, 'VGK': 54, 'WSH': 15, 'WPG': 52,
-            'ARI': 53, 'SEA': 55, 'UTA': 59
+        // Color scheme for different game outcomes
+        const colors = {
+            win: '#2ecc71',
+            loss: '#e74c3c',
+            otWin: '#f39c12',
+            otLoss: '#95a5a6',
+            preseason: '#9b59b6'
         };
 
         // Load CSV data from GitHub on page load
@@ -461,7 +312,7 @@
         });
 
         function loadDataFromGitHub() {
-            const csvUrl = 'nhl_complete_1994_2025.csv';
+            const csvUrl = 'nhl_complete_1994_2025.csv'; // Updated filename
             
             fetch(csvUrl)
                 .then(response => {
@@ -474,7 +325,7 @@
                     Papa.parse(csvText, {
                         header: true,
                         complete: function(results) {
-                            gameData = results.data.filter(row => row.game_id);
+                            gameData = results.data.filter(row => row.game_id); // Filter out empty rows
                             populateSeasonSelect();
                             console.log('Data loaded:', gameData.length, 'games');
                         },
@@ -507,26 +358,31 @@
             const seasonSelect = document.getElementById('seasonSelect');
             seasonSelect.innerHTML = '<option value="">Choose a season...</option>';
 
+            // Extract unique seasons and format them nicely
             gameData.forEach(game => {
                 if (game.season) {
                     seasons.add(game.season);
                 }
             });
 
+            // Sort seasons in descending order (most recent first)
             const sortedSeasons = Array.from(seasons).sort().reverse();
             
             sortedSeasons.forEach(season => {
                 const option = document.createElement('option');
                 option.value = season;
+                // Format season display (20232024 -> 2023-24)
                 const displaySeason = formatSeasonDisplay(season);
                 option.textContent = displaySeason;
                 seasonSelect.appendChild(option);
             });
 
+            // Add change event listener
             seasonSelect.addEventListener('change', function() {
                 populateTeamSelect();
             });
 
+            // Auto-select first season if only one is available
             if (sortedSeasons.length === 1) {
                 seasonSelect.value = sortedSeasons[0];
                 populateTeamSelect();
@@ -534,6 +390,7 @@
         }
 
         function formatSeasonDisplay(season) {
+            // Convert 19941995 to 1994-95
             if (season && season.length === 8) {
                 const startYear = season.substring(0, 4);
                 const endYear = season.substring(6, 8);
@@ -555,6 +412,7 @@
             const teamSelect = document.getElementById('teamSelect');
             teamSelect.innerHTML = '<option value="">Choose a team...</option>';
 
+            // Extract unique teams for the selected season
             const seasonGames = gameData.filter(game => game.season === selectedSeason);
             
             seasonGames.forEach(game => {
@@ -562,6 +420,7 @@
                 if (game.away_team_code) teams.add(game.away_team_code);
             });
 
+            // Sort teams alphabetically
             const sortedTeams = Array.from(teams).sort();
             sortedTeams.forEach(team => {
                 const option = document.createElement('option');
@@ -571,63 +430,6 @@
             });
 
             console.log(`Found ${sortedTeams.length} teams for season ${formatSeasonDisplay(selectedSeason)}`);
-        }
-
-        function createFloatingLogos(teamCode) {
-            const logoBackground = document.getElementById('logoBackground');
-            logoBackground.innerHTML = '';
-
-            // Create multiple floating logos
-            for (let i = 0; i < 5; i++) {
-                const logoDiv = document.createElement('div');
-                logoDiv.className = 'floating-logo';
-                
-                const img = document.createElement('img');
-                img.src = getTeamLogoUrl(teamCode);
-                img.alt = `${teamCode} Logo`;
-                
-                // Position randomly
-                logoDiv.style.left = Math.random() * 80 + '%';
-                logoDiv.style.top = Math.random() * 80 + '%';
-                
-                // Add error handling for logo loading
-                img.onerror = function() {
-                    // Try alternative logo sources
-                    const altUrls = [
-                        `https://a.espncdn.com/i/teamlogos/nhl/500/${teamCode}.png`,
-                        `https://cdn.nhl.com/logos/nhl/svg/${teamCode}_light.svg`,
-                        `https://assets.nhle.com/logos/nhl/svg/${teamCode}_light.svg`
-                    ];
-                    
-                    let urlIndex = 0;
-                    const tryNextUrl = () => {
-                        if (urlIndex < altUrls.length) {
-                            img.src = altUrls[urlIndex];
-                            urlIndex++;
-                        } else {
-                            // If all URLs fail, hide the logo
-                            logoDiv.style.display = 'none';
-                        }
-                    };
-                    
-                    img.onerror = tryNextUrl;
-                    tryNextUrl();
-                };
-                
-                logoDiv.appendChild(img);
-                logoBackground.appendChild(logoDiv);
-            }
-        }
-
-        function getTeamLogoUrl(teamCode) {
-            // Primary: NHL official API
-            const teamId = teamIds[teamCode];
-            if (teamId) {
-                return `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${teamId}.svg`;
-            }
-            
-            // Fallback: ESPN CDN
-            return `https://a.espncdn.com/i/teamlogos/nhl/500/${teamCode}.png`;
         }
 
         function generateScarf() {
@@ -650,12 +452,6 @@
                 return;
             }
 
-            // Create floating logos for the selected team
-            createFloatingLogos(selectedTeam);
-
-            // Get team-specific color scheme
-            const teamColorScheme = getTeamColorScheme(selectedTeam);
-
             // Filter games for selected team and season
             const teamGames = gameData.filter(game => 
                 game.season === selectedSeason && 
@@ -676,6 +472,7 @@
                 const stripe = document.createElement('div');
                 stripe.className = 'scarf-stripe';
                 
+                // Determine if team won or lost
                 const isHome = game.home_team_code === selectedTeam;
                 const teamScore = isHome ? parseInt(game.home_score) : parseInt(game.away_score);
                 const opponentScore = isHome ? parseInt(game.away_score) : parseInt(game.home_score);
@@ -683,35 +480,38 @@
                 const isOvertime = game.overtime === 'True' || game.shootout === 'True';
                 const isPreseason = game.game_type === '1';
 
+                // Determine color
                 let color;
                 if (isPreseason) {
-                    color = teamColorScheme.preseason;
+                    color = colors.preseason;
                     preseason++;
                 } else if (isWin) {
                     if (isOvertime) {
-                        color = teamColorScheme.otWin;
+                        color = colors.otWin;
                         otWins++;
                     } else {
-                        color = teamColorScheme.win;
+                        color = colors.win;
                         wins++;
                     }
                 } else {
                     if (isOvertime) {
-                        color = teamColorScheme.otLoss;
+                        color = colors.otLoss;
                         otLosses++;
                     } else {
-                        color = teamColorScheme.loss;
+                        color = colors.loss;
                         losses++;
                     }
                 }
 
                 stripe.style.backgroundColor = color;
                 
+                // Add hover tooltip with enhanced information including shots
                 const opponent = isHome ? game.away_team_code : game.home_team_code;
                 const venue = isHome ? 'vs' : '@';
                 const score = `${teamScore}-${opponentScore}`;
                 const gameDate = new Date(game.date).toLocaleDateString();
                 
+                // Get shots data - handle cases where shots might be missing
                 const teamShots = isHome ? (game.home_shots || 'N/A') : (game.away_shots || 'N/A');
                 const opponentShots = isHome ? (game.away_shots || 'N/A') : (game.home_shots || 'N/A');
                 const shotsInfo = teamShots !== 'N/A' && opponentShots !== 'N/A' ? 
@@ -728,32 +528,8 @@
                 scarfElement.appendChild(stripe);
             });
 
-        function updateLegend(teamCode) {
-            const teamColorScheme = getTeamColorScheme(teamCode);
-            const legend = document.querySelector('.legend');
-            
-            legend.innerHTML = `
-                <div class="legend-item">
-                    <div class="legend-color" style="background: ${teamColorScheme.win};"></div>
-                    <span>Win</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: ${teamColorScheme.loss};"></div>
-                    <span>Loss</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: ${teamColorScheme.otWin};"></div>
-                    <span>OT/SO Win</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: ${teamColorScheme.otLoss};"></div>
-                    <span>OT/SO Loss</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: ${teamColorScheme.preseason};"></div>
-                    <span>Preseason</span>
-                </div>
-            `;
+            // Update stats
+            updateStats(wins, losses, otWins, otLosses, preseason, teamGames.length);
         }
 
         function updateStats(wins, losses, otWins, otLosses, preseason, total) {
@@ -807,7 +583,8 @@
             tooltip.style.top = e.pageY + 10 + 'px';
         }
 
-        console.log('NHL Season Scarf Generator with animated logos initialized');
+        // Initialize - data will be loaded automatically on page load
+        console.log('NHL Season Scarf Generator initialized');
     </script>
 </body>
 </html>
