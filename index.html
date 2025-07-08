@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>🧣 NHL Season Scarf Generator</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Ctext y='32' font-size='32'%3E%F0%9F%A7%A3%3C/text%3E%3C/svg%3E">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHL Season Scarf Generator</title>
     <style>
         * {
             margin: 0;
@@ -11,7 +12,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
@@ -196,25 +197,25 @@
 <body>
     <div class="container">
         <h1>🏒 NHL Season Scarf Generator</h1>
-        <p class="subtitle">Transform your team's season into a beautiful visual scarf (1994-2025)</p>
+        <p class="subtitle">Transform your team's season into a beautiful visual scarf (1994 to 2025)</p>
         
         <div class="controls">
             <div class="control-group">
-                <label for="seasonSelect">Select Season:</label>
+                <label for="seasonSelect">Select Season</label>
                 <select id="seasonSelect">
                     <option value="">Loading seasons...</option>
                 </select>
             </div>
             
             <div class="control-group">
-                <label for="teamSelect">Select Team:</label>
+                <label for="teamSelect">Select Team</label>
                 <select id="teamSelect">
-                    <option value="">Choose a season first...</option>
+                    <option value="">Choose a season first</option>
                 </select>
             </div>
             
             <div class="control-group">
-                <label for="scarfWidth">Scarf Width:</label>
+                <label for="scarfWidth">Scarf Width</label>
                 <select id="scarfWidth">
                     <option value="300">Narrow (300px)</option>
                     <option value="500" selected>Medium (500px)</option>
@@ -223,7 +224,6 @@
                 </select>
             </div>
 
-            <!-- hidden until a team is picked -->
             <div id="colourControls" style="display: none; flex-wrap: wrap; gap: 20px;">
                 <div class="control-group">
                     <label for="winColorSelect">Win Colour</label>
@@ -252,23 +252,23 @@
 
         <div class="legend">
             <div class="legend-item">
-                <div class="legend-color" style="background: #2ecc71;"></div>
+                <div class="legend-color" style="background: #2ecc71"></div>
                 <span>Win</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: #e74c3c;"></div>
+                <div class="legend-color" style="background: #e74c3c"></div>
                 <span>Loss</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: #f39c12;"></div>
+                <div class="legend-color" style="background: #f39c12"></div>
                 <span>OT / SO Win</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: #95a5a6;"></div>
+                <div class="legend-color" style="background: #95a5a6"></div>
                 <span>OT / SO Loss</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: #9b59b6;"></div>
+                <div class="legend-color" style="background: #9b59b6"></div>
                 <span>Preseason</span>
             </div>
         </div>
@@ -289,12 +289,12 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script>
-        let gameData = [];
-        let teams = new Set();
-        let seasons = new Set();
-        let teamColoursData = [];
+        let gameData = []
+        let teams = new Set()
+        let seasons = new Set()
+        let teamColoursData = []
 
-        // map each team code to its full name in the colours CSV
+        // map each code to its exact Team name in colours CSV
         const codeToFullName = {
             ANA: 'Anaheim Ducks',
             ARI: 'Arizona Coyotes',
@@ -324,40 +324,36 @@
             STL: 'St. Louis Blues',
             TBL: 'Tampa Bay Lightning',
             TOR: 'Toronto Maple Leafs',
+            UTA: 'Utah Mammoth',
             VAN: 'Vancouver Canucks',
             VGK: 'Vegas Golden Knights',
             WPG: 'Winnipeg Jets',
             WSH: 'Washington Capitals'
-        };
+        }
 
         const colors = {
-            win: '#2ecc71',
-            loss: '#e74c3c',
-            otWin: '#f39c12',
-            otLoss: '#95a5a6',
-            preseason: '#9b59b6'
-        };
+            win: null,
+            loss: null,
+            otWin: null,
+            otLoss: null,
+            preseason: null
+        }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            loadDataFromGitHub();
-            loadTeamColours();
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDataFromGitHub()
+            loadTeamColours()
+        })
 
         function loadTeamColours() {
             fetch('nhl_team_colors.csv')
-                .then(r => {
-                    if (!r.ok) throw new Error('Could not load team colours');
-                    return r.text();
-                })
-                .then(txt => {
-                    Papa.parse(txt, {
-                        header: true,
-                        complete(results) {
-                            teamColoursData = results.data.filter(r => r.Team && r['Hex Code']);
-                        }
-                    });
-                })
-                .catch(console.error);
+                .then(r => r.ok ? r.text() : Promise.reject('Could not load team colours'))
+                .then(txt => Papa.parse(txt, {
+                    header: true,
+                    complete(res) {
+                        teamColoursData = res.data.filter(r => r.Team && r['Hex Code'])
+                    }
+                }))
+                .catch(console.error)
         }
 
         function loadDataFromGitHub() {
@@ -366,167 +362,160 @@
                 .then(txt => Papa.parse(txt, {
                     header: true,
                     complete(res) {
-                        gameData = res.data.filter(r => r.game_id);
-                        populateSeasonSelect();
+                        gameData = res.data.filter(r => r.game_id)
+                        populateSeasonSelect()
                     }
                 }))
-                .catch(console.error);
+                .catch(console.error)
         }
 
         function populateSeasonSelect() {
-            seasons.clear();
-            const s = document.getElementById('seasonSelect');
-            s.innerHTML = '<option value="">Choose a season...</option>';
-            gameData.forEach(g => g.season && seasons.add(g.season));
+            seasons.clear()
+            const s = document.getElementById('seasonSelect')
+            s.innerHTML = '<option value="">Choose a season</option>'
+            gameData.forEach(g => g.season && seasons.add(g.season))
             Array.from(seasons).sort().reverse()
                 .forEach(season => {
-                    const o = document.createElement('option');
-                    o.value = season;
-                    o.textContent = season.substring(0,4) + '-' + season.substring(6,8);
-                    s.appendChild(o);
-                });
-            s.onchange = populateTeamSelect;
-            if (seasons.size===1) {
-                s.value = [...seasons][0];
-                populateTeamSelect();
-            }
+                    const o = document.createElement('option')
+                    o.value = season
+                    o.textContent = season.slice(0,4) + '-' + season.slice(6,8)
+                    s.appendChild(o)
+                })
+            s.onchange = populateTeamSelect
         }
 
         function populateTeamSelect() {
-            // hide the colour picks until a team is chosen
-            document.getElementById('colourControls').style.display = 'none';
-
-            const season = document.getElementById('seasonSelect').value;
-            const t = document.getElementById('teamSelect');
+            document.getElementById('colourControls').style.display = 'none'
+            const season = document.getElementById('seasonSelect').value
+            const t = document.getElementById('teamSelect')
             if (!season) {
-                t.innerHTML = '<option value="">Choose a season first...</option>';
-                return;
+                t.innerHTML = '<option value="">Choose a season first</option>'
+                return
             }
-            teams.clear();
-            t.innerHTML = '<option value="">Choose a team...</option>';
-            gameData.filter(g => g.season===season)
+            teams.clear()
+            t.innerHTML = '<option value="">Choose a team</option>'
+            gameData.filter(g => g.season === season)
                 .forEach(g => {
-                    if (g.home_team_code) teams.add(g.home_team_code);
-                    if (g.away_team_code) teams.add(g.away_team_code);
-                });
+                    if (g.home_team_code) teams.add(g.home_team_code)
+                    if (g.away_team_code) teams.add(g.away_team_code)
+                })
             Array.from(teams).sort()
                 .forEach(code => {
-                    const o = document.createElement('option');
-                    o.value = code;
-                    o.textContent = code;
-                    t.appendChild(o);
-                });
-            t.onchange = populateColourSelectors;
+                    const o = document.createElement('option')
+                    o.value = code
+                    o.textContent = code
+                    t.appendChild(o)
+                })
+            t.onchange = populateColourSelectors
         }
 
         function populateColourSelectors() {
-            const code = document.getElementById('teamSelect').value;
-            const name = codeToFullName[code];
-            const choices = teamColoursData.filter(c => c.Team===name);
+            const code = document.getElementById('teamSelect').value
+            const name = codeToFullName[code]
+            const choices = teamColoursData.filter(c => c.Team === name)
 
-            const ids = [
-                'winColorSelect',
-                'lossColorSelect',
-                'otWinColorSelect',
-                'otLossColorSelect',
-                'preseasonColorSelect'
-            ];
-            ids.forEach(id => {
-                const sel = document.getElementById(id);
-                sel.innerHTML = '';
+            // set defaults: first home, second away, third alternate
+            const defaults = {
+                win: choices[0]?.['Hex Code'] || '',
+                loss: choices[1]?.['Hex Code'] || '',
+                ot: choices[2]?.['Hex Code'] || '',
+                preseason: choices[0]?.['Hex Code'] || ''
+            }
+
+            const mapping = {
+                winColorSelect: defaults.win,
+                lossColorSelect: defaults.loss,
+                otWinColorSelect: defaults.ot,
+                otLossColorSelect: defaults.ot,
+                preseasonColorSelect: defaults.preseason
+            }
+
+            Object.entries(mapping).forEach(([id, def]) => {
+                const sel = document.getElementById(id)
+                sel.innerHTML = ''
                 choices.forEach(c => {
-                    const o = document.createElement('option');
-                    o.value = c['Hex Code'];
-                    o.textContent = c['Color Name'];
-                    o.style.backgroundColor = c['Hex Code'];
-                    sel.appendChild(o);
-                });
-            });
+                    const o = document.createElement('option')
+                    o.value = c['Hex Code']
+                    o.textContent = c['Color Name']
+                    o.style.backgroundColor = c['Hex Code']
+                    sel.appendChild(o)
+                })
+                if (def) sel.value = def
+            })
 
-            // now show them
-            document.getElementById('colourControls').style.display = 'flex';
+            document.getElementById('colourControls').style.display = 'flex'
         }
 
         function generateScarf() {
-            colors.win       = document.getElementById('winColorSelect').value;
-            colors.loss      = document.getElementById('lossColorSelect').value;
-            colors.otWin     = document.getElementById('otWinColorSelect').value;
-            colors.otLoss    = document.getElementById('otLossColorSelect').value;
-            colors.preseason = document.getElementById('preseasonColorSelect').value;
+            colors.win       = document.getElementById('winColorSelect').value
+            colors.loss      = document.getElementById('lossColorSelect').value
+            colors.otWin     = document.getElementById('otWinColorSelect').value
+            colors.otLoss    = document.getElementById('otLossColorSelect').value
+            colors.preseason = document.getElementById('preseasonColorSelect').value
 
-            const team = document.getElementById('teamSelect').value;
-            const season = document.getElementById('seasonSelect').value;
-            const width = document.getElementById('scarfWidth').value;
-            if (!season) return alert('Please select a season first!');
-            if (!team)   return alert('Please select a team first!');
-            if (!gameData.length) return alert('Data still loading, wait a moment.');
+            const team = document.getElementById('teamSelect').value
+            const season = document.getElementById('seasonSelect').value
+            const width = document.getElementById('scarfWidth').value
+            if (!season) return alert('Please select a season first')
+            if (!team)   return alert('Please select a team first')
+            if (!gameData.length) return alert('Data still loading, wait a moment')
 
             const games = gameData
-                .filter(g =>
-                    g.season===season &&
-                    (g.home_team_code===team || g.away_team_code===team)
-                )
-                .sort((a,b)=> new Date(a.date) - new Date(b.date));
+                .filter(g => g.season === season && (g.home_team_code === team || g.away_team_code === team))
+                .sort((a,b) => new Date(a.date) - new Date(b.date))
 
-            const scarf = document.getElementById('scarf');
-            scarf.innerHTML=''; 
-            scarf.style.width = width+'px';
+            const scarf = document.getElementById('scarf')
+            scarf.innerHTML = ''
+            scarf.style.width = width + 'px'
 
-            let wins=0, losses=0, otWins=0, otLosses=0, preseason=0;
+            let w = 0, l = 0, ow = 0, ol = 0, p = 0
             games.forEach(g => {
-                const stripe = document.createElement('div');
-                stripe.className = 'scarf-stripe';
+                const s = document.createElement('div')
+                s.className = 'scarf-stripe'
+                const isHome = g.home_team_code === team
+                const ts = + (isHome ? g.home_score : g.away_score)
+                const os = + (isHome ? g.away_score : g.home_score)
+                const won = ts > os
+                const ot  = g.overtime === 'True' || g.shootout === 'True'
+                const pre = g.game_type === '1'
 
-                const isHome = g.home_team_code===team;
-                const ts = parseInt(isHome?g.home_score:g.away_score);
-                const os = parseInt(isHome?g.away_score:g.home_score);
-                const won = ts>os;
-                const ot  = g.overtime==='True'||g.shootout==='True';
-                const pre = g.game_type==='1';
-
-                let col;
+                let col
                 if (pre) {
-                    col = colors.preseason; preseason++;
+                    col = colors.preseason; p++
                 } else if (won) {
-                    if (ot) {
-                        col = colors.otWin; otWins++;
-                    } else {
-                        col = colors.win; wins++;
-                    }
+                    if (ot) { col = colors.otWin; ow++ }
+                    else    { col = colors.win; w++ }
                 } else {
-                    if (ot) {
-                        col = colors.otLoss; otLosses++;
-                    } else {
-                        col = colors.loss; losses++;
-                    }
+                    if (ot) { col = colors.otLoss; ol++ }
+                    else    { col = colors.loss; l++ }
                 }
-                stripe.style.backgroundColor = col;
+                s.style.backgroundColor = col
 
-                const opp   = isHome?g.away_team_code:g.home_team_code;
-                const venue = isHome?'vs':'@';
-                const date  = new Date(g.date).toLocaleDateString();
-                const shots = isHome?`${g.home_shots||'N/A'}-${g.away_shots||'N/A'}`
-                                   :`${g.away_shots||'N/A'}-${g.home_shots||'N/A'}`;
+                const opp   = isHome ? g.away_team_code : g.home_team_code
+                const venue = isHome ? 'vs' : '@'
+                const date  = new Date(g.date).toLocaleDateString()
+                const shots = isHome ? `${g.home_shots||'N/A'}-${g.away_shots||'N/A'}`
+                                     : `${g.away_shots||'N/A'}-${g.home_shots||'N/A'}`
                 const txt   = `${date} ${venue} ${opp} ${ts}-${os}`
-                              + (ot?' (OT/SO)':'')
-                              + (pre?' (Preseason)':'')
-                              + (shots.includes('N/A')?'':`\nShots: ${shots}`);
-                stripe.setAttribute('data-tooltip', txt);
+                              + (ot ? ' (OT/SO)' : '')
+                              + (pre ? ' (Preseason)' : '')
+                              + (shots.includes('N/A') ? '' : `\nShots: ${shots}`)
+                s.setAttribute('data-tooltip', txt)
 
-                stripe.addEventListener('mouseenter', showTooltip);
-                stripe.addEventListener('mouseleave', hideTooltip);
-                stripe.addEventListener('mousemove', updateTooltipPosition);
-                scarf.appendChild(stripe);
-            });
+                s.addEventListener('mouseenter', showTooltip)
+                s.addEventListener('mouseleave', hideTooltip)
+                s.addEventListener('mousemove', updateTooltipPosition)
+                scarf.appendChild(s)
+            })
 
-            updateStats(wins,losses,otWins,otLosses,preseason,games.length);
+            updateStats(w, l, ow, ol, p, games.length)
         }
 
-        function updateStats(w,l,ow,ol,p,total) {
-            const out = document.getElementById('stats');
-            const reg = total-p;
-            const pts = w*2 + ow*2 + ol*1;
-            const pct = reg>0?((w+ow)/reg*100).toFixed(1):0;
+        function updateStats(w, l, ow, ol, p, total) {
+            const out = document.getElementById('stats')
+            const reg = total - p
+            const pts = w*2 + ow*2 + ol*1
+            const pct = reg > 0 ? ((w + ow)/reg * 100).toFixed(1) : 0
             out.innerHTML = `
                 <div class="stat-card">
                     <div class="stat-value">${w+ow}</div>
@@ -552,25 +541,23 @@
                     <div class="stat-value">${reg}</div>
                     <div class="stat-label">Regular Season Games</div>
                 </div>
-            `;
+            `
         }
 
         function showTooltip(e) {
-            const tip = document.getElementById('tooltip');
-            tip.textContent = e.target.getAttribute('data-tooltip');
-            tip.style.display = 'block';
-            updateTooltipPosition(e);
+            const tip = document.getElementById('tooltip')
+            tip.textContent = e.target.getAttribute('data-tooltip')
+            tip.style.display = 'block'
+            updateTooltipPosition(e)
         }
         function hideTooltip() {
-            document.getElementById('tooltip').style.display = 'none';
+            document.getElementById('tooltip').style.display = 'none'
         }
         function updateTooltipPosition(e) {
-            const tip = document.getElementById('tooltip');
-            tip.style.left = e.pageX + 10 + 'px';
-            tip.style.top  = e.pageY + 10 + 'px';
+            const tip = document.getElementById('tooltip')
+            tip.style.left = e.pageX + 10 + 'px'
+            tip.style.top  = e.pageY + 10 + 'px'
         }
-
-        console.log('NHL Season Scarf Generator initialized');
     </script>
 </body>
 </html>
