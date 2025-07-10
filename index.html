@@ -121,6 +121,10 @@
             transition: transform 0.2s;
             cursor: pointer;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 2px;
         
             /* base colour comes from JS via background-color */
             background-repeat: repeat;
@@ -155,6 +159,13 @@
         }
         .scarf-stripe:hover::after {
             opacity: 1;
+        }
+        .scarf-emoji {
+            font-size: 6px;
+            line-height: 1;
+            position: relative;
+            z-index: 3;
+            text-shadow: 0 0 2px rgba(0,0,0,0.8);
         }
         .stats {
             display: grid;
@@ -287,6 +298,12 @@
                 <div class="legend-color" style="background: #9b59b6"></div>
                 <span>Preseason</span>
             </div>
+            <div class="legend-item">
+                <span>⚡ First Goal</span>
+            </div>
+            <div class="legend-item">
+                <span>🔥 Comeback</span>
+            </div>
         </div>
 
         <div class="scarf-container">
@@ -298,6 +315,7 @@
         <div class="info-text">
             <p>Select a season and team to generate their season scarf!</p>
             <p>Each stripe represents one game, hover over stripes to see game details including shots.</p>
+            <p>⚡ indicates the team scored first, 🔥 indicates a successful comeback.</p>
         </div>
     </div>
 
@@ -507,15 +525,35 @@
                 }
                 s.style.backgroundColor = col
 
+                // Check for first goal and comeback
+                const scoredFirst = (isHome && g.first_goal === 'home') || (!isHome && g.first_goal === 'away')
+                const hadComeback = (isHome && g.home_comeback === 'True') || (!isHome && g.away_comeback === 'True')
+
+                // Add emojis if applicable
+                let emojiText = ''
+                if (scoredFirst) emojiText += '⚡'
+                if (hadComeback) emojiText += '🔥'
+
+                if (emojiText) {
+                    const emojiSpan = document.createElement('span')
+                    emojiSpan.className = 'scarf-emoji'
+                    emojiSpan.textContent = emojiText
+                    s.appendChild(emojiSpan)
+                }
+
                 const opp   = isHome ? g.away_team_code : g.home_team_code
                 const venue = isHome ? 'vs' : '@'
                 const date  = new Date(g.date).toLocaleDateString()
                 const shots = isHome ? `${g.home_shots||'N/A'}-${g.away_shots||'N/A'}`
                                      : `${g.away_shots||'N/A'}-${g.home_shots||'N/A'}`
-                const txt   = `${date} ${venue} ${opp} ${ts}-${os}`
-                              + (ot ? ' (OT/SO)' : '')
-                              + (pre ? ' (Preseason)' : '')
-                              + (shots.includes('N/A') ? '' : `\nShots: ${shots}`)
+                
+                let txt = `${date} ${venue} ${opp} ${ts}-${os}`
+                if (ot) txt += ' (OT/SO)'
+                if (pre) txt += ' (Preseason)'
+                if (scoredFirst) txt += ' ⚡First Goal'
+                if (hadComeback) txt += ' 🔥Comeback'
+                if (!shots.includes('N/A')) txt += `\nShots: ${shots}`
+                
                 s.setAttribute('data-tooltip', txt)
 
                 s.addEventListener('mouseenter', showTooltip)
