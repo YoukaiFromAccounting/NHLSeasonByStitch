@@ -190,6 +190,12 @@
             font-size: 0.9em;
             margin-top: 5px;
         }
+        .stat-sublabel {
+            color: #95a5a6;
+            font-size: 0.75em;
+            margin-top: 3px;
+            font-style: italic;
+        }
         .info-text {
             text-align: center;
             color: #7f8c8d;
@@ -503,6 +509,7 @@
             scarf.style.width = width + 'px'
 
             let w = 0, l = 0, ow = 0, ol = 0, p = 0
+            let firstGoalCount = 0, comebackCount = 0, totalGoals = 0
             games.forEach(g => {
                 const s = document.createElement('div')
                 s.className = 'scarf-stripe'
@@ -528,6 +535,13 @@
                 // Check for first goal and comeback
                 const scoredFirst = (isHome && g.first_goal === 'home') || (!isHome && g.first_goal === 'away')
                 const hadComeback = (isHome && g.home_comeback === 'True') || (!isHome && g.away_comeback === 'True')
+                
+                // Track statistics
+                if (scoredFirst) firstGoalCount++
+                if (hadComeback) comebackCount++
+                if (!pre) { // Only count regular season/playoff goals
+                    totalGoals += ts
+                }
 
                 // Add emojis if applicable
                 let emojiText = ''
@@ -562,14 +576,24 @@
                 scarf.appendChild(s)
             })
 
-            updateStats(w, l, ow, ol, p, games.length)
+            updateStats(w, l, ow, ol, p, games.length, firstGoalCount, comebackCount, totalGoals)
         }
 
-        function updateStats(w, l, ow, ol, p, total) {
+        function updateStats(w, l, ow, ol, p, total, firstGoalCount, comebackCount, totalGoals) {
             const out = document.getElementById('stats')
             const reg = total - p
             const pts = w*2 + ow*2 + ol*1
             const pct = reg > 0 ? ((w + ow)/reg * 100).toFixed(1) : 0
+            
+            // Calculate additional stats
+            const firstGoalPct = reg > 0 ? ((firstGoalCount / reg) * 100).toFixed(1) : 0
+            const comebackPct = reg > 0 ? ((comebackCount / reg) * 100).toFixed(1) : 0
+            const avgWaitTime = reg > 0 ? ((60 * reg) / Math.max(totalGoals, 1)).toFixed(1) : 0
+            
+            // League average estimates (based on historical NHL data)
+            const leagueFirstGoalAvg = 50.0 // Teams score first ~50% of the time against any opponent
+            const leagueComebackAvg = 15.0 // Teams comeback ~15% of the time
+            
             out.innerHTML = `
                 <div class="stat-card">
                     <div class="stat-value">${w+ow}</div>
@@ -586,6 +610,21 @@
                 <div class="stat-card">
                     <div class="stat-value">${pct}%</div>
                     <div class="stat-label">Win Percentage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${firstGoalCount}</div>
+                    <div class="stat-label">Scored First</div>
+                    <div class="stat-sublabel">${firstGoalPct}% vs ${leagueFirstGoalAvg}% avg</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${comebackCount}</div>
+                    <div class="stat-label">Comebacks</div>
+                    <div class="stat-sublabel">${comebackPct}% vs ${leagueComebackAvg}% avg</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${avgWaitTime}</div>
+                    <div class="stat-label">Avg Wait Per Goal (min)</div>
+                    <div class="stat-sublabel">Based on ${totalGoals} goals scored</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${ow+ol}</div>
