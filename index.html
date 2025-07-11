@@ -31,24 +31,11 @@
             pointer-events: none;
         }
         
-        /* Foreground logo animations */
-        .foreground-logos {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            pointer-events: none;
-            display: none;
-        }
-        
         .floating-logo {
             position: absolute;
-            width: 60px;
-            height: 60px;
+            width: 120px;
+            height: 120px;
             opacity: 0.15;
-            animation: float 8s infinite ease-in-out;
             border-radius: 50%;
             background-size: contain;
             background-repeat: no-repeat;
@@ -56,28 +43,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        
-        .foreground-logo {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            opacity: 0.25;
-            animation: float 6s infinite ease-in-out;
-            border-radius: 50%;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            25% { transform: translateY(-20px) rotate(90deg); }
-            50% { transform: translateY(0px) rotate(180deg); }
-            75% { transform: translateY(-15px) rotate(270deg); }
+            transition: transform 0.1s ease-out;
         }
         
         .container {
@@ -290,8 +256,8 @@
                 gap: 10px;
             }
             .floating-logo {
-                width: 40px;
-                height: 40px;
+                width: 80px;
+                height: 80px;
             }
         }
     </style>
@@ -299,9 +265,6 @@
 <body>
     <!-- Background floating logos -->
     <div class="background-logos" id="backgroundLogos"></div>
-    
-    <!-- Foreground floating logos (for selected team) -->
-    <div class="foreground-logos" id="foregroundLogos"></div>
     
     <div class="container">
         <h1>🏒 NHL Season Scarf Generator</h1>
@@ -445,41 +408,7 @@
             WSH: 'team_logos/WSH.png'
         }
 
-        // Team alternate logos (for foreground display)
-        const teamAlternateLogos = {
-            ANA: ['team_logos/ANA_Alt1.png', 'team_logos/ANA_Alt2.png'],
-            ARI: ['team_logos/ARI_Alt1.png', 'team_logos/ARI_Alt2.png'],
-            BOS: ['team_logos/BOS_Alt1.png', 'team_logos/BOS_Alt2.png'],
-            BUF: ['team_logos/BUF_Alt1.png', 'team_logos/BUF_Alt2.png'],
-            CGY: ['team_logos/CGY_Alt1.png'],
-            CAR: ['team_logos/CAR_Alt1.png', 'team_logos/CAR_Alt2.png'],
-            CBJ: ['team_logos/CBJ_Alt1.png', 'team_logos/CBJ_Alt2.png'],
-            CHI: [],
-            COL: ['team_logos/COL_Alt1.png', 'team_logos/COL_Alt2.png'],
-            DAL: ['team_logos/DAL_Alt1.png', 'team_logos/DAL_Alt2.png'],
-            DET: [],
-            EDM: [],
-            FLA: ['team_logos/FLA_Alt1.png', 'team_logos/FLA_Alt2.png', 'team_logos/FLA_Alt3.png', 'team_logos/FLA_Second.png'],
-            LAK: ['team_logos/LAK_Alt1.png', 'team_logos/LAK_Alt2.png', 'team_logos/LAK_Alt3.png'],
-            MIN: ['team_logos/MIN_Alt1.png', 'team_logos/MIN_Alt2.png', 'team_logos/MIN_Alt3.png', 'team_logos/MIN_Ann.png'],
-            MTL: [],
-            NSH: ['team_logos/NSH_Alt1.png', 'team_logos/NSH_Alt2.png', 'team_logos/NSH_Alt3.png', 'team_logos/NSH_Alt4.png'],
-            NJD: ['team_logos/NJD_Alt1.png'],
-            NYI: ['team_logos/NYI_Alt1.png', 'team_logos/NYI_Alt2.png', 'team_logos/NYI_Alt3.png'],
-            NYR: ['team_logos/NYR_Alt1.png', 'team_logos/NYR_Alt2.png', 'team_logos/NYR_Alt3.png', 'team_logos/NYR_Alt4.png'],
-            OTT: ['team_logos/OTT_Alt1.png', 'team_logos/OTT_Alt2.png'],
-            PHI: ['team_logos/PHI_Alt1.png'],
-            PIT: ['team_logos/PIT_Alt1.png', 'team_logos/PIT_Alt2.png'],
-            SJS: ['team_logos/SJS_Alt1.png', 'team_logos/SJS_Alt2.png', 'team_logos/SJS_Alt3.png', 'team_logos/SJS_Alt4.png', 'team_logos/SJS_Alt5.png', 'team_logos/SJS_Ann.png'],
-            SEA: ['team_logos/SEA_Alt1.png', 'team_logos/SEA_Alt2.png'],
-            STL: ['team_logos/STL_Alt1.png'],
-            TBL: ['team_logos/TBL_Alt1.png', 'team_logos/TBL_Alt2.png', 'team_logos/TBL_Alt3.png', 'team_logos/TBL_Alt4.png'],
-            TOR: ['team_logos/TOR_Alt1.png', 'team_logos/TOR_Alt2.png', 'team_logos/TOR_Alt3.png', 'team_logos/TOR_Alt4.png'],
-            VAN: ['team_logos/VAN_Alt1.png', 'team_logos/VAN_Alt2.png'],
-            VGK: ['team_logos/VGK_Alt1.png'],
-            WPG: ['team_logos/WPG_Alt1.png', 'team_logos/WPG_Alt2.png', 'team_logos/WPG_Alt3.png', 'team_logos/WPG_Alt4.png', 'team_logos/WPG_Alt5.png'],
-            WSH: ['team_logos/WSH_Alt1.png', 'team_logos/WSH_Alt2.png', 'team_logos/WSH_Alt3.png', 'team_logos/WSH_Alt4.png']
-        }
+
 
         // map each code to its exact Team name in colours CSV
         const codeToFullName = {
@@ -532,11 +461,32 @@
             createFloatingLogos()
         })
 
+        // Handle window resize to update logo physics
+        window.addEventListener('resize', () => {
+            if (logos.length > 0) {
+                // Update logo positions to stay within new window bounds
+                logos.forEach(logo => {
+                    const maxX = window.innerWidth - 120
+                    const maxY = window.innerHeight - 120
+                    logo.x = Math.min(logo.x, maxX)
+                    logo.y = Math.min(logo.y, maxY)
+                })
+            }
+        })
+
+        // Physics variables for logo movement
+        let logos = []
+        let animationId = null
+
         function createFloatingLogos() {
             const container = document.getElementById('backgroundLogos')
             const teamCodes = Object.keys(teamLogos)
             
-            // Create 15 random floating logos
+            // Clear existing logos
+            container.innerHTML = ''
+            logos = []
+            
+            // Create 15 random floating logos with physics
             for (let i = 0; i < 15; i++) {
                 const logo = document.createElement('div')
                 logo.className = 'floating-logo'
@@ -558,7 +508,7 @@
                     this.style.display = 'none'
                     const fallback = document.createElement('div')
                     fallback.textContent = '🏒'
-                    fallback.style.fontSize = '40px'
+                    fallback.style.fontSize = '80px'
                     fallback.style.display = 'flex'
                     fallback.style.alignItems = 'center'
                     fallback.style.justifyContent = 'center'
@@ -569,79 +519,95 @@
                 
                 logo.appendChild(img)
                 
-                // Random position
-                logo.style.left = Math.random() * 90 + '%'
-                logo.style.top = Math.random() * 90 + '%'
+                // Initialize physics properties
+                const logoObj = {
+                    element: logo,
+                    x: Math.random() * (window.innerWidth - 120),
+                    y: Math.random() * (window.innerHeight - 120),
+                    vx: (Math.random() - 0.5) * 2, // Random velocity
+                    vy: (Math.random() - 0.5) * 2,
+                    radius: 60 // Half of logo size for collision detection
+                }
                 
-                // Random animation delay and duration
-                logo.style.animationDelay = Math.random() * 8 + 's'
-                logo.style.animationDuration = (8 + Math.random() * 4) + 's'
+                logo.style.left = logoObj.x + 'px'
+                logo.style.top = logoObj.y + 'px'
                 
+                logos.push(logoObj)
                 container.appendChild(logo)
             }
+            
+            // Start animation
+            if (animationId) {
+                cancelAnimationFrame(animationId)
+            }
+            animateLogos()
         }
 
-        function createForegroundLogos(teamCode) {
-            const container = document.getElementById('foregroundLogos')
-            container.innerHTML = '' // Clear existing logos
+        function animateLogos() {
+            const container = document.getElementById('backgroundLogos')
+            const containerRect = container.getBoundingClientRect()
             
-            if (!teamCode || !teamLogos[teamCode]) {
-                container.style.display = 'none'
-                return
-            }
-            
-            // Get all logos for this team (primary + alternates)
-            const allLogos = [teamLogos[teamCode]]
-            if (teamAlternateLogos[teamCode]) {
-                allLogos.push(...teamAlternateLogos[teamCode])
-            }
-            
-            // Create 8-12 floating logos using team's logos
-            const numLogos = Math.min(allLogos.length * 3, 12)
-            for (let i = 0; i < numLogos; i++) {
-                const logo = document.createElement('div')
-                logo.className = 'foreground-logo'
+            logos.forEach(logo => {
+                // Update position
+                logo.x += logo.vx
+                logo.y += logo.vy
                 
-                // Pick a random logo from the team's collection
-                const logoUrl = allLogos[Math.floor(Math.random() * allLogos.length)]
-                
-                // Create image element for logo
-                const img = document.createElement('img')
-                img.src = logoUrl
-                img.alt = teamCode
-                img.style.width = '100%'
-                img.style.height = '100%'
-                img.style.objectFit = 'contain'
-                
-                // Handle image load errors with fallback
-                img.onerror = function() {
-                    this.style.display = 'none'
-                    const fallback = document.createElement('div')
-                    fallback.textContent = '🏒'
-                    fallback.style.fontSize = '50px'
-                    fallback.style.display = 'flex'
-                    fallback.style.alignItems = 'center'
-                    fallback.style.justifyContent = 'center'
-                    fallback.style.width = '100%'
-                    fallback.style.height = '100%'
-                    this.parentNode.appendChild(fallback)
+                // Bounce off walls
+                if (logo.x <= 0 || logo.x >= window.innerWidth - 120) {
+                    logo.vx = -logo.vx
+                    logo.x = Math.max(0, Math.min(window.innerWidth - 120, logo.x))
+                }
+                if (logo.y <= 0 || logo.y >= window.innerHeight - 120) {
+                    logo.vy = -logo.vy
+                    logo.y = Math.max(0, Math.min(window.innerHeight - 120, logo.y))
                 }
                 
-                logo.appendChild(img)
+                // Check collisions with other logos
+                logos.forEach(otherLogo => {
+                    if (logo !== otherLogo) {
+                        const dx = otherLogo.x - logo.x
+                        const dy = otherLogo.y - logo.y
+                        const distance = Math.sqrt(dx * dx + dy * dy)
+                        
+                        if (distance < logo.radius + otherLogo.radius) {
+                            // Collision detected - bounce
+                            const angle = Math.atan2(dy, dx)
+                            const speed1 = Math.sqrt(logo.vx * logo.vx + logo.vy * logo.vy)
+                            const speed2 = Math.sqrt(otherLogo.vx * otherLogo.vx + otherLogo.vy * otherLogo.vy)
+                            
+                            // Simple elastic collision
+                            const newVx1 = -Math.cos(angle) * speed1
+                            const newVy1 = -Math.sin(angle) * speed1
+                            const newVx2 = Math.cos(angle) * speed2
+                            const newVy2 = Math.sin(angle) * speed2
+                            
+                            logo.vx = newVx1
+                            logo.vy = newVy1
+                            otherLogo.vx = newVx2
+                            otherLogo.vy = newVy2
+                            
+                            // Separate logos to prevent sticking
+                            const overlap = (logo.radius + otherLogo.radius - distance) / 2
+                            const moveX = Math.cos(angle) * overlap
+                            const moveY = Math.sin(angle) * overlap
+                            
+                            logo.x -= moveX
+                            logo.y -= moveY
+                            otherLogo.x += moveX
+                            otherLogo.y += moveY
+                        }
+                    }
+                })
                 
-                // Random position
-                logo.style.left = Math.random() * 90 + '%'
-                logo.style.top = Math.random() * 90 + '%'
-                
-                // Random animation delay and duration
-                logo.style.animationDelay = Math.random() * 6 + 's'
-                logo.style.animationDuration = (6 + Math.random() * 3) + 's'
-                
-                container.appendChild(logo)
-            }
+                // Update element position
+                logo.element.style.left = logo.x + 'px'
+                logo.element.style.top = logo.y + 'px'
+            })
             
-            container.style.display = 'block'
+            animationId = requestAnimationFrame(animateLogos)
         }
+
+
 
         function loadTeamColours() {
             fetch('nhl_team_colors.csv')
@@ -714,9 +680,6 @@
             const code = document.getElementById('teamSelect').value
             const name = codeToFullName[code]
             const choices = teamColoursData.filter(c => c.Team === name)
-
-            // Create foreground logos for selected team
-            createForegroundLogos(code)
 
             // set defaults: first home, second away, third alternate
             const defaults = {
