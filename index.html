@@ -16,7 +16,40 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
+        
+        /* Background logo animations */
+        .background-logos {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .floating-logo {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            opacity: 0.15;
+            animation: float 8s infinite ease-in-out;
+            border-radius: 50%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(90deg); }
+            50% { transform: translateY(0px) rotate(180deg); }
+            75% { transform: translateY(-15px) rotate(270deg); }
+        }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -25,6 +58,8 @@
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
         }
         h1 {
             text-align: center;
@@ -224,10 +259,17 @@
                 flex-direction: column;
                 gap: 10px;
             }
+            .floating-logo {
+                width: 40px;
+                height: 40px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Background floating logos -->
+    <div class="background-logos" id="backgroundLogos"></div>
+    
     <div class="container">
         <h1>🏒 NHL Season Scarf Generator</h1>
         <p class="subtitle">Transform your team's season into a beautiful visual scarf (1994 to 2025)</p>
@@ -334,6 +376,43 @@
         let seasons = new Set()
         let teamColoursData = []
 
+        // NHL team logos (using emoji/text representations for now)
+        const teamLogos = {
+            ANA: '🦆', // Ducks
+            ARI: '🐺', // Coyotes
+            BOS: '🐻', // Bruins
+            BUF: '🦌', // Sabres
+            CGY: '🔥', // Flames
+            CAR: '🌪️', // Hurricanes
+            CBJ: '🏴', // Blue Jackets
+            CHI: '🪶', // Blackhawks
+            COL: '🏔️', // Avalanche
+            DAL: '⭐', // Stars
+            DET: '🔴', // Red Wings
+            EDM: '🛢️', // Oilers
+            FLA: '🐆', // Panthers
+            LAK: '👑', // Kings
+            MIN: '🌲', // Wild
+            MTL: '🇨🇦', // Canadiens
+            NSH: '🎸', // Predators
+            NJD: '😈', // Devils
+            NYI: '🏝️', // Islanders
+            NYR: '🗽', // Rangers
+            OTT: '⚔️', // Senators
+            PHI: '🧡', // Flyers
+            PIT: '🐧', // Penguins
+            SJS: '🦈', // Sharks
+            SEA: '🐙', // Kraken
+            STL: '🎵', // Blues
+            TBL: '⚡', // Lightning
+            TOR: '🍁', // Maple Leafs
+            UTA: '🦣', // Utah
+            VAN: '🌊', // Canucks
+            VGK: '⚔️', // Golden Knights
+            WPG: '✈️', // Jets
+            WSH: '🏛️'  // Capitals
+        }
+
         // map each code to its exact Team name in colours CSV
         const codeToFullName = {
             ANA: 'Anaheim Ducks',
@@ -382,7 +461,37 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadDataFromGitHub()
             loadTeamColours()
+            createFloatingLogos()
         })
+
+        function createFloatingLogos() {
+            const container = document.getElementById('backgroundLogos')
+            const teamCodes = Object.keys(teamLogos)
+            
+            // Create 15 random floating logos
+            for (let i = 0; i < 15; i++) {
+                const logo = document.createElement('div')
+                logo.className = 'floating-logo'
+                
+                // Random team
+                const randomTeam = teamCodes[Math.floor(Math.random() * teamCodes.length)]
+                logo.textContent = teamLogos[randomTeam]
+                logo.style.fontSize = '40px'
+                logo.style.display = 'flex'
+                logo.style.alignItems = 'center'
+                logo.style.justifyContent = 'center'
+                
+                // Random position
+                logo.style.left = Math.random() * 90 + '%'
+                logo.style.top = Math.random() * 90 + '%'
+                
+                // Random animation delay and duration
+                logo.style.animationDelay = Math.random() * 8 + 's'
+                logo.style.animationDuration = (8 + Math.random() * 4) + 's'
+                
+                container.appendChild(logo)
+            }
+        }
 
         function loadTeamColours() {
             fetch('nhl_team_colors.csv')
@@ -443,7 +552,7 @@
                 .forEach(code => {
                     const o = document.createElement('option')
                     o.value = code
-                    o.textContent = code
+                    o.textContent = `${teamLogos[code] || '🏒'} ${code}`
                     t.appendChild(o)
                 })
             t.onchange = populateColourSelectors
