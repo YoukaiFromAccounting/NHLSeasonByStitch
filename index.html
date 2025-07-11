@@ -41,6 +41,9 @@
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         @keyframes float {
@@ -376,41 +379,41 @@
         let seasons = new Set()
         let teamColoursData = []
 
-        // NHL team logos (using emoji/text representations for now)
+        // NHL team logos (using local logo files)
         const teamLogos = {
-            ANA: '🦆', // Ducks
-            ARI: '🐺', // Coyotes
-            BOS: '🐻', // Bruins
-            BUF: '🦌', // Sabres
-            CGY: '🔥', // Flames
-            CAR: '🌪️', // Hurricanes
-            CBJ: '🏴', // Blue Jackets
-            CHI: '🪶', // Blackhawks
-            COL: '🏔️', // Avalanche
-            DAL: '⭐', // Stars
-            DET: '🔴', // Red Wings
-            EDM: '🛢️', // Oilers
-            FLA: '🐆', // Panthers
-            LAK: '👑', // Kings
-            MIN: '🌲', // Wild
-            MTL: '🇨🇦', // Canadiens
-            NSH: '🎸', // Predators
-            NJD: '😈', // Devils
-            NYI: '🏝️', // Islanders
-            NYR: '🗽', // Rangers
-            OTT: '⚔️', // Senators
-            PHI: '🧡', // Flyers
-            PIT: '🐧', // Penguins
-            SJS: '🦈', // Sharks
-            SEA: '🐙', // Kraken
-            STL: '🎵', // Blues
-            TBL: '⚡', // Lightning
-            TOR: '🍁', // Maple Leafs
-            UTA: '🦣', // Utah
-            VAN: '🌊', // Canucks
-            VGK: '⚔️', // Golden Knights
-            WPG: '✈️', // Jets
-            WSH: '🏛️'  // Capitals
+            ANA: 'team_logos/ANA.png',
+            ARI: 'team_logos/ARI.png',
+            BOS: 'team_logos/BOS.png',
+            BUF: 'team_logos/BUF.png',
+            CGY: 'team_logos/CGY.png',
+            CAR: 'team_logos/CAR.png',
+            CBJ: 'team_logos/CBJ.png',
+            CHI: 'team_logos/CHI.png',
+            COL: 'team_logos/COL.png',
+            DAL: 'team_logos/DAL.png',
+            DET: 'team_logos/DET.png',
+            EDM: 'team_logos/EDM.png',
+            FLA: 'team_logos/FLA.png',
+            LAK: 'team_logos/LAK.png',
+            MIN: 'team_logos/MIN.png',
+            MTL: 'team_logos/MTL.png',
+            NSH: 'team_logos/NSH.png',
+            NJD: 'team_logos/NJD.png',
+            NYI: 'team_logos/NYI.png',
+            NYR: 'team_logos/NYR.png',
+            OTT: 'team_logos/OTT.png',
+            PHI: 'team_logos/PHI.png',
+            PIT: 'team_logos/PIT.png',
+            SJS: 'team_logos/SJS.png',
+            SEA: 'team_logos/SEA.png',
+            STL: 'team_logos/STL.png',
+            TBL: 'team_logos/TBL.png',
+            TOR: 'team_logos/TOR.png',
+            UTA: 'team_logos/UTA.png',
+            VAN: 'team_logos/VAN.png',
+            VGK: 'team_logos/VGK.png',
+            WPG: 'team_logos/WPG.png',
+            WSH: 'team_logos/WSH.png'
         }
 
         // map each code to its exact Team name in colours CSV
@@ -468,6 +471,14 @@
             const container = document.getElementById('backgroundLogos')
             const teamCodes = Object.keys(teamLogos)
             
+            // Fallback emojis for missing logos
+            const fallbackEmojis = {
+                CHI: '🪶', // Blackhawks
+                NYR: '🗽', // Rangers
+                OTT: '⚔️', // Senators
+                // Add more fallbacks as needed
+            }
+            
             // Create 15 random floating logos
             for (let i = 0; i < 15; i++) {
                 const logo = document.createElement('div')
@@ -475,11 +486,45 @@
                 
                 // Random team
                 const randomTeam = teamCodes[Math.floor(Math.random() * teamCodes.length)]
-                logo.textContent = teamLogos[randomTeam]
-                logo.style.fontSize = '40px'
-                logo.style.display = 'flex'
-                logo.style.alignItems = 'center'
-                logo.style.justifyContent = 'center'
+                const logoUrl = teamLogos[randomTeam]
+                
+                // Check if logo file exists, otherwise use fallback
+                if (logoUrl && !logoUrl.includes('CHI') && !logoUrl.includes('NYR') && !logoUrl.includes('OTT')) {
+                    // Create image element for existing logos
+                    const img = document.createElement('img')
+                    img.src = logoUrl
+                    img.alt = randomTeam
+                    img.style.width = '100%'
+                    img.style.height = '100%'
+                    img.style.objectFit = 'contain'
+                    
+                    // Handle image load errors
+                    img.onerror = function() {
+                        this.style.display = 'none'
+                        const fallback = document.createElement('div')
+                        fallback.textContent = fallbackEmojis[randomTeam] || '🏒'
+                        fallback.style.fontSize = '40px'
+                        fallback.style.display = 'flex'
+                        fallback.style.alignItems = 'center'
+                        fallback.style.justifyContent = 'center'
+                        fallback.style.width = '100%'
+                        fallback.style.height = '100%'
+                        this.parentNode.appendChild(fallback)
+                    }
+                    
+                    logo.appendChild(img)
+                } else {
+                    // Use fallback emoji for missing logos
+                    const fallback = document.createElement('div')
+                    fallback.textContent = fallbackEmojis[randomTeam] || '🏒'
+                    fallback.style.fontSize = '40px'
+                    fallback.style.display = 'flex'
+                    fallback.style.alignItems = 'center'
+                    fallback.style.justifyContent = 'center'
+                    fallback.style.width = '100%'
+                    fallback.style.height = '100%'
+                    logo.appendChild(fallback)
+                }
                 
                 // Random position
                 logo.style.left = Math.random() * 90 + '%'
@@ -552,7 +597,21 @@
                 .forEach(code => {
                     const o = document.createElement('option')
                     o.value = code
-                    o.textContent = `${teamLogos[code] || '🏒'} ${code}`
+                    
+                    // Check if we have a logo for this team
+                    if (teamLogos[code] && !code.includes('CHI') && !code.includes('NYR') && !code.includes('OTT')) {
+                        o.textContent = `${code}`
+                        // Note: HTML select options don't support images, so we'll just show the code
+                    } else {
+                        // Use fallback emoji for missing logos
+                        const fallbackEmojis = {
+                            CHI: '🪶', // Blackhawks
+                            NYR: '🗽', // Rangers
+                            OTT: '⚔️', // Senators
+                        }
+                        o.textContent = `${fallbackEmojis[code] || '🏒'} ${code}`
+                    }
+                    
                     t.appendChild(o)
                 })
             t.onchange = populateColourSelectors
