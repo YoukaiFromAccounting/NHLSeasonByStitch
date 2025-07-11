@@ -144,18 +144,18 @@
         
         .scarf-side-logos {
             position: absolute;
-            right: -150px;
+            right: -280px;
             top: 50%;
             transform: translateY(-50%);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
             align-items: center;
         }
         
         .scarf-side-logo {
-            width: 60px;
-            height: 60px;
+            width: 240px;
+            height: 240px;
             border-radius: 50%;
             background-size: contain;
             background-repeat: no-repeat;
@@ -528,19 +528,9 @@
             createFloatingLogos()
         })
 
-        // Handle window resize to update logo physics
+        // Handle window resize to update carousel positioning
         window.addEventListener('resize', () => {
-            if (logos.length > 0) {
-                // Update logo positions to stay within new window bounds
-                logos.forEach(logo => {
-                    const maxX = window.innerWidth - 120
-                    const maxY = window.innerHeight - 120
-                    logo.x = Math.min(logo.x, maxX)
-                    logo.y = Math.min(logo.y, maxY)
-                })
-            }
-            
-            // Recreate logos with new positioning
+            // Recreate logos with new positioning for carousel
             createFloatingLogos()
         })
 
@@ -587,20 +577,13 @@
                 
                 logo.appendChild(img)
                 
-                // Initialize physics properties - spread logos around the screen
-                const angle = (index / teamCodes.length) * 2 * Math.PI
-                const centerX = window.innerWidth / 2
-                const centerY = window.innerHeight / 2
-                const radius = Math.min(window.innerWidth, window.innerHeight) * 0.3
-                
+                // Initialize carousel properties
                 const logoObj = {
                     element: logo,
                     teamCode: teamCode,
-                    x: centerX + Math.cos(angle) * radius,
-                    y: centerY + Math.sin(angle) * radius,
-                    vx: (Math.random() - 0.5) * 1.5, // Slightly slower initial velocity
-                    vy: (Math.random() - 0.5) * 1.5,
-                    radius: 60 // Half of logo size for collision detection
+                    x: 0, // Will be set by animation
+                    y: 0, // Will be set by animation
+                    index: index
                 }
                 
                 logo.style.left = logoObj.x + 'px'
@@ -618,58 +601,24 @@
         }
 
         function animateLogos() {
-            const container = document.getElementById('backgroundLogos')
-            const containerRect = container.getBoundingClientRect()
+            const time = Date.now() * 0.001 // Time in seconds
+            const centerX = window.innerWidth / 2
+            const centerY = window.innerHeight / 2
             
-            logos.forEach(logo => {
-                // Update position
-                logo.x += logo.vx
-                logo.y += logo.vy
+            // Carousel parameters - oval that goes through left and right sides
+            const ovalWidth = window.innerWidth * 0.8 // 80% of screen width
+            const ovalHeight = window.innerHeight * 0.6 // 60% of screen height
+            const speed = 0.5 // Rotation speed (radians per second)
+            
+            logos.forEach((logo, index) => {
+                // Calculate position on oval carousel
+                const angle = (index / logos.length) * 2 * Math.PI + time * speed
+                const x = centerX + Math.cos(angle) * ovalWidth / 2
+                const y = centerY + Math.sin(angle) * ovalHeight / 2
                 
-                // Bounce off walls
-                if (logo.x <= 0 || logo.x >= window.innerWidth - 120) {
-                    logo.vx = -logo.vx
-                    logo.x = Math.max(0, Math.min(window.innerWidth - 120, logo.x))
-                }
-                if (logo.y <= 0 || logo.y >= window.innerHeight - 120) {
-                    logo.vy = -logo.vy
-                    logo.y = Math.max(0, Math.min(window.innerHeight - 120, logo.y))
-                }
-                
-                // Slingshot effect with other logos
-                logos.forEach(otherLogo => {
-                    if (logo !== otherLogo) {
-                        const dx = otherLogo.x - logo.x
-                        const dy = otherLogo.y - logo.y
-                        const distance = Math.sqrt(dx * dx + dy * dy)
-                        const minDistance = logo.radius + otherLogo.radius + 20 // Extra buffer
-                        
-                        if (distance < minDistance) {
-                            // Calculate repulsion force (slingshot effect)
-                            const force = (minDistance - distance) / minDistance
-                            const angle = Math.atan2(dy, dx)
-                            
-                            // Apply repulsion force
-                            const repulsionX = Math.cos(angle) * force * 0.5
-                            const repulsionY = Math.sin(angle) * force * 0.5
-                            
-                            logo.vx -= repulsionX
-                            logo.vy -= repulsionY
-                            otherLogo.vx += repulsionX
-                            otherLogo.vy += repulsionY
-                            
-                            // Separate logos to prevent getting too close
-                            const separation = (minDistance - distance) / 2
-                            const moveX = Math.cos(angle) * separation
-                            const moveY = Math.sin(angle) * separation
-                            
-                            logo.x -= moveX
-                            logo.y -= moveY
-                            otherLogo.x += moveX
-                            otherLogo.y += moveY
-                        }
-                    }
-                })
+                // Update logo position
+                logo.x = x
+                logo.y = y
                 
                 // Update element position
                 logo.element.style.left = logo.x + 'px'
@@ -781,7 +730,7 @@
                     this.style.display = 'none'
                     const fallback = document.createElement('div')
                     fallback.textContent = '🏒'
-                    fallback.style.fontSize = '30px'
+                    fallback.style.fontSize = '120px'
                     fallback.style.display = 'flex'
                     fallback.style.alignItems = 'center'
                     fallback.style.justifyContent = 'center'
