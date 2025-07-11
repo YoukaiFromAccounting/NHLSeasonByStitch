@@ -18,6 +18,7 @@
             padding: 20px;
             position: relative;
             overflow-x: hidden;
+            transition: background 1.5s ease-in-out;
         }
         
         /* Background logo animations */
@@ -537,6 +538,12 @@
         // Physics variables for logo movement
         let logos = []
         let animationId = null
+        
+        // Background transition variables
+        let currentBackgroundColor = '#667eea'
+        let targetBackgroundColor = '#667eea'
+        let backgroundTransitionStart = 0
+        let backgroundTransitionDuration = 1500 // 1.5 seconds
 
         function createFloatingLogos() {
             const container = document.getElementById('backgroundLogos')
@@ -606,9 +613,9 @@
             const centerY = window.innerHeight / 2
             
             // Carousel parameters - oval that goes through left and right sides
-            const ovalWidth = window.innerWidth * 0.8 // 80% of screen width
+            const ovalWidth = window.innerWidth * 0.9 // 90% of screen width
             const ovalHeight = window.innerHeight * 0.6 // 60% of screen height
-            const speed = 0.5 // Rotation speed (radians per second)
+            const speed = 0.15 // Much slower rotation speed (radians per second)
             
             logos.forEach((logo, index) => {
                 // Calculate position on oval carousel
@@ -625,7 +632,44 @@
                 logo.element.style.top = logo.y + 'px'
             })
             
+            // Handle background transition
+            updateBackgroundTransition()
+            
             animationId = requestAnimationFrame(animateLogos)
+        }
+        
+        function updateBackgroundTransition() {
+            if (backgroundTransitionStart > 0) {
+                const elapsed = Date.now() - backgroundTransitionStart
+                const progress = Math.min(elapsed / backgroundTransitionDuration, 1)
+                
+                if (progress < 1) {
+                    // Interpolate between current and target colors
+                    const currentColor = hexToRgb(currentBackgroundColor)
+                    const targetColor = hexToRgb(targetBackgroundColor)
+                    
+                    const r = Math.round(currentColor.r + (targetColor.r - currentColor.r) * progress)
+                    const g = Math.round(currentColor.g + (targetColor.g - currentColor.g) * progress)
+                    const b = Math.round(currentColor.b + (targetColor.b - currentColor.b) * progress)
+                    
+                    const newColor = `rgb(${r}, ${g}, ${b})`
+                    document.body.style.background = `linear-gradient(135deg, ${newColor} 0%, ${targetBackgroundColor} 100%)`
+                } else {
+                    // Transition complete
+                    currentBackgroundColor = targetBackgroundColor
+                    backgroundTransitionStart = 0
+                    document.body.style.background = `linear-gradient(135deg, ${targetBackgroundColor} 0%, ${targetBackgroundColor} 100%)`
+                }
+            }
+        }
+        
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : {r: 0, g: 0, b: 0}
         }
 
 
@@ -799,6 +843,10 @@
             if (!season) return alert('Please select a season first')
             if (!team)   return alert('Please select a team first')
             if (!gameData.length) return alert('Data still loading, wait a moment')
+            
+            // Start background transition to team's primary color
+            targetBackgroundColor = colors.win || '#667eea'
+            backgroundTransitionStart = Date.now()
 
             const games = gameData
                 .filter(g => g.season === season && (g.home_team_code === team || g.away_team_code === team))
