@@ -35,7 +35,7 @@
             position: absolute;
             width: 120px;
             height: 120px;
-            opacity: 0.15;
+            opacity: 0.45;
             border-radius: 50%;
             background-size: contain;
             background-repeat: no-repeat;
@@ -133,6 +133,7 @@
         }
 
         function animateLogos() {
+<<<<<<< HEAD
             const time = Date.now() * 0.001;
             const centerX = window.innerWidth * 0.5;
             const centerY = window.innerHeight * 0.5;
@@ -155,6 +156,36 @@
 
             updateBackgroundTransition();
             animationId = requestAnimationFrame(animateLogos);
+=======
+            const time = Date.now() * 0.001 // Time in seconds
+            const centerX = window.innerWidth / 2
+            const centerY = window.innerHeight / 2
+            
+            // Carousel parameters - oval that goes through left and right sides
+            const ovalWidth = window.innerWidth * 0.9 // 90% of screen width
+            const ovalHeight = window.innerHeight * 0.6 // 60% of screen height
+            const speed = -0.15 // Much slower rotation speed (radians per second)
+            
+            logos.forEach((logo, index) => {
+                // Calculate position on oval carousel
+                const angle = (index / logos.length) * 2 * Math.PI + time * speed
+                const x = centerX + Math.cos(angle) * ovalWidth / 2
+                const y = centerY + Math.sin(angle) * ovalHeight / 2
+                
+                // Update logo position
+                logo.x = x
+                logo.y = y
+                
+                // Update element position
+                logo.element.style.left = logo.x + 'px'
+                logo.element.style.top = logo.y + 'px'
+            })
+            
+            // Handle background transition
+            updateBackgroundTransition()
+            
+            animationId = requestAnimationFrame(animateLogos)
+>>>>>>> 0fa2cff43dbfe33827724ac93f64443758a82432
         }
 
         function updateBackgroundTransition() {
