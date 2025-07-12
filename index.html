@@ -18,7 +18,7 @@
             padding: 20px;
             position: relative;
             overflow-x: hidden;
-            transition: background 1.5s ease-in-out;
+            transition: background 2.5s ease-in-out;
         }
         
         /* Background logo animations */
@@ -30,6 +30,7 @@
             height: 100%;
             z-index: 0;
             pointer-events: none;
+            transform: translate(-50%, -50%);
         }
         
         .floating-logo {
@@ -794,9 +795,6 @@
             const code = document.getElementById('teamSelect').value
             const name = codeToFullName[code]
             const choices = teamColoursData.filter(c => c.Team === name)
-            
-            // Create side logos for selected team
-            createScarfSideLogos(code)
 
             // set defaults: first home, second away, third alternate
             const defaults = {
@@ -843,6 +841,9 @@
             if (!season) return alert('Please select a season first')
             if (!team)   return alert('Please select a team first')
             if (!gameData.length) return alert('Data still loading, wait a moment')
+
+            // Create side logos for selected team
+            createScarfSideLogos(code)
             
             // Start background transition to team's primary color
             targetBackgroundColor = colors.win || '#667eea'
