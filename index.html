@@ -30,7 +30,6 @@
             height: 100%;
             z-index: 0;
             pointer-events: none;
-            transform: translate(-50%, -50%);
         }
         
         .floating-logo {
@@ -796,6 +795,9 @@
             const name = codeToFullName[code]
             const choices = teamColoursData.filter(c => c.Team === name)
 
+            // Create side logos for selected team
+            createScarfSideLogos(code)
+            
             // set defaults: first home, second away, third alternate
             const defaults = {
                 win: choices[0]?.['Hex Code'] || '',
@@ -841,9 +843,6 @@
             if (!season) return alert('Please select a season first')
             if (!team)   return alert('Please select a team first')
             if (!gameData.length) return alert('Data still loading, wait a moment')
-
-            // Create side logos for selected team
-            createScarfSideLogos(code)
             
             // Start background transition to team's primary color
             targetBackgroundColor = colors.win || '#667eea'
@@ -852,7 +851,7 @@
             const games = gameData
                 .filter(g => g.season === season && (g.home_team_code === team || g.away_team_code === team))
                 .sort((a,b) => new Date(a.date) - new Date(b.date))
-
+            
             const scarf = document.getElementById('scarf')
             scarf.innerHTML = ''
             scarf.style.width = width + 'px'
