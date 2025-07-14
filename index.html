@@ -548,6 +548,12 @@
         function createFloatingLogos() {
             const container = document.getElementById('backgroundLogos')
             const teamCodes = Object.keys(teamLogos)
+              .sort((a, b) => {
+                // look up the full names and compare them
+                const nameA = codeToFullName[a]
+                const nameB = codeToFullName[b]
+                return nameA.localeCompare(nameB)
+              })
             
             // Clear existing logos
             container.innerHTML = ''
