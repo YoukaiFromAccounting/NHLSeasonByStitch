@@ -282,11 +282,10 @@
             justify-content: center;
             align-items: center;
             padding: 12px 0;
-            background: white;
         }
         .scarf-wordmark img {
-            max-height: 80px;
-            max-width: 80%;
+            max-height: 240px;
+            width: auto;
         }
         @media (max-width: 768px) {
             .controls {
@@ -895,22 +894,23 @@
             scarf.innerHTML = ''
             scarf.style.width = width + 'px'
 
+            // insert team wordmark at top
+            const wordmarkDiv = document.createElement('div')
+            wordmarkDiv.className = 'scarf-wordmark'
+            wordmarkDiv.style.backgroundColor = colors.win || '#667eea'
+            const wmImg = document.createElement('img')
+            wmImg.src = `team_logos/${team}_Word.png`
+            wmImg.alt = `${team} wordmark`
+            wordmarkDiv.appendChild(wmImg)
+            scarf.appendChild(wordmarkDiv)
+
             let w = 0, l = 0, ow = 0, ol = 0, p = 0
             let firstGoalCount = 0, comebackCount = 0, totalGoals = 0
 
             //DEBUG
             const mid = Math.floor(games.length/2);
             
-            games.forEach((g,i) => {
-                if (i === mid) {
-                    const wmDiv = document.createElement('div');
-                    wmDiv.className = 'scarf-wordmark';
-                    const wmImg = document.createElement('img');
-                    wmImg.src = `team_logos/${team}_Word.png`;
-                    wmImg.alt = team + ' wordmark';
-                    wmDiv.appendChild(wmImg);
-                    scarf.appendChild(wmDiv);
-                  }
+            games.forEach(g => {
                 const s = document.createElement('div')
                 s.className = 'scarf-stripe'
                 const isHome = g.home_team_code === team
