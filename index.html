@@ -277,13 +277,15 @@
             max-width: 300px;
             line-height: 1.4;
         }.scarf-wordmark {
+            background:none;
+            padding: 0;
             width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 12px 0;
         }
         .scarf-wordmark img {
+            background: transparent;
             max-height: 240px;
             width: auto;
         }
@@ -898,9 +900,11 @@
             const wordmarkDiv = document.createElement('div')
             wordmarkDiv.className = 'scarf-wordmark'
             wordmarkDiv.style.backgroundColor = colors.win || '#667eea'
+            
             const wmImg = document.createElement('img')
             wmImg.src = `team_logos/${team}_Word.png`
             wmImg.alt = `${team} wordmark`
+            
             wordmarkDiv.appendChild(wmImg)
             scarf.appendChild(wordmarkDiv)
 
