@@ -279,8 +279,9 @@
         }.scarf-wordmark {
             background-color: white;
             padding: 0;
-            width: 100%;
-            margin: 0;
+            width: auto;
+            max-width: 100%;
+            margin: 0 auto;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -290,8 +291,11 @@
             border: none;
             border-radius: 0;
             display: block;
+            max-width: 100%;
+            height:auto;
             max-height: 240px;
             width: auto;
+            object-fit: contain;
         }
         @media (max-width: 768px) {
             .controls {
