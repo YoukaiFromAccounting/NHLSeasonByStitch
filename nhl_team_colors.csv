@@ -1,7 +1,7 @@
 Team,Color Name,Hex Code
 Anaheim Ducks,Orange,#CF4520
 Anaheim Ducks,Black,#000000
-Anaheim Ducks,Gold,#89734C
+Anaheim Ducks,Metallic Gold,#89734C
 Anaheim Ducks,White,#FFFFFF
 Arizona Coyotes,Process Black,#010101
 Arizona Coyotes,Brick Red,#6F263D
@@ -60,7 +60,7 @@ Edmonton Oilers,Navy,#041E42
 Edmonton Oilers,Orange Alt,#FC4C02
 Florida Panthers,Red,#C8102E
 Florida Panthers,Blue,#041E42
-Florida Panthers,Gold,#B9975B
+Florida Panthers,Flat Gold,#B9975B
 Florida Panthers,White,#FFFFFF
 Los Angeles Kings,Black,#000000
 Los Angeles Kings,Silver,#A2AAAD
@@ -75,7 +75,7 @@ Minnesota Wild,Gold Alt,#FFB81C
 Montreal Canadiens,Rouge,#A6192E
 Montreal Canadiens,Blanc,#FFFFFF
 Montreal Canadiens,Bleu,#001E62
-Nashville Predators,Gold,#FFB81C
+Nashville Predators,Predators Gold,#FFB81C
 Nashville Predators,Navy,#041E42
 Nashville Predators,White,#FFFFFF
 New Jersey Devils,Red,#C8102E
@@ -84,7 +84,7 @@ New Jersey Devils,White,#FFFFFF
 New York Islanders,Royal Blue,#003087
 New York Islanders,Orange,#FC4C02
 New York Islanders,White,#FFFFFF
-New York Rangers,Blue,#0033A0
+New York Rangers,Royal Blue,#0033A0
 New York Rangers,Red,#C8102E
 New York Rangers,White,#FFFFFF
 New York Rangers,Navy,#041E42
@@ -93,9 +93,9 @@ Ottawa Senators,Red,#C8102E
 Ottawa Senators,Gold,#B9975B
 Ottawa Senators,White,#FFFFFF
 Philadelphia Flyers,Burnt Orange,#CF4520
-Philadelphia Flyers,Black,#000000
-Philadelphia Flyers,White,#FFFFFF
-Philadelphia Flyers,Orange Alt,#FA4616
+Philadelphia Flyers,Midnight Black,#000000
+Philadelphia Flyers,Frost White,#FFFFFF
+Philadelphia Flyers,Red Orange,#FA4616
 Pittsburgh Penguins,Black,#000000
 Pittsburgh Penguins,Pittsburgh Gold,#FFB81C
 Pittsburgh Penguins,White,#FFFFFF
@@ -144,6 +144,6 @@ Winnipeg Jets,Polar Night Blue,#041E42
 Winnipeg Jets,Aviator Blue,#004C97
 Winnipeg Jets,Silver,#A2AAAD
 Winnipeg Jets,White,#FFFFFF
-Winnipeg Jets,Grey,#53565A
+Winnipeg Jets,Fighter Grey,#53565A
 Winnipeg Jets,Red,#A6192E
 Winnipeg Jets,Dark Red,#782F40
