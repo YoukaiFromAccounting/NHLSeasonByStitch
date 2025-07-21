@@ -297,6 +297,11 @@
             width: auto;
             object-fit: contain;
         }
+        .stat-blurb {
+          font-size: 0.9em;
+          color: #7f8c8d;
+          margin-top: 8px;
+        }
         @media (max-width: 768px) {
             .controls {
                 flex-direction: column;
@@ -995,12 +1000,34 @@
                 scarf.appendChild(s)
             })
 
-            updateStats(w, l, ow, ol, p, games.length, firstGoalCount, comebackCount, totalGoals)
+            const teamName    = codeToFullName[team]
+            const seasonLabel = season.slice(0,4) + '-' + season.slice(6,8)
+            updateStats(
+              w, l, ow, ol, p,
+              games.length,
+              firstGoalCount,
+              comebackCount,
+              totalGoals,
+              teamName,
+              seasonLabel
+            )
         }
 
-        function updateStats(w, l, ow, ol, p, total, firstGoalCount, comebackCount, totalGoals) {
+        function updateStats(
+            w, l, ow, ol, p,
+            total,
+            firstGoalCount,
+            comebackCount,
+            totalGoals,
+            teamName,
+            seasonLabel
+            ) {
             const out = document.getElementById('stats')
             const reg = total - p
+            const leagueFirstGoalAvg = 50.0
+            const firstGoalPct = reg > 0
+            ? ((firstGoalCount / reg) * 100).toFixed(1)
+            : 0
             const pts = w*2 + ow*2 + ol*1
             const pct = reg > 0 ? ((w + ow)/reg * 100).toFixed(1) : 0
             
@@ -1031,9 +1058,14 @@
                     <div class="stat-label">Win Percentage</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">${firstGoalCount}</div>
-                    <div class="stat-label">Scored First</div>
-                    <div class="stat-sublabel">${firstGoalPct}% vs ${leagueFirstGoalAvg}% avg</div>
+                  <div class="stat-value">${firstGoalCount}</div>
+                  <div class="stat-label">Scored First</div>
+                  <div class="stat-sublabel">
+                    ${firstGoalPct}% vs ${leagueFirstGoalAvg}% avg
+                  </div>
+                  <div class="stat-blurb">
+                    The ${seasonLabel} ${teamName} had a ${firstGoalPct}% chance to score first.
+                  </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${comebackCount}</div>
