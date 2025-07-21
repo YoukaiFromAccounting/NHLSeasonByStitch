@@ -297,11 +297,6 @@
             width: auto;
             object-fit: contain;
         }
-        .stat-blurb {
-          font-size: 0.9em;
-          color: #7f8c8d;
-          margin-top: 8px;
-        }
         @media (max-width: 768px) {
             .controls {
                 flex-direction: column;
@@ -685,13 +680,13 @@
                     const g = Math.round(currentColor.g + (targetColor.g - currentColor.g) * progress)
                     const b = Math.round(currentColor.b + (targetColor.b - currentColor.b) * progress)
                     
-                    const newColor = `rgb(${r}, ${g}, ${b})`
-                    document.body.style.background = `linear-gradient(135deg, ${newColor} 0%, ${targetBackgroundColor} 100%)`
+                    const newColor = rgb(${r}, ${g}, ${b})
+                    document.body.style.background = linear-gradient(135deg, ${newColor} 0%, ${targetBackgroundColor} 100%)
                 } else {
                     // Transition complete
                     currentBackgroundColor = targetBackgroundColor
                     backgroundTransitionStart = 0
-                    document.body.style.background = `linear-gradient(135deg, ${targetBackgroundColor} 0%, ${targetBackgroundColor} 100%)`
+                    document.body.style.background = linear-gradient(135deg, ${targetBackgroundColor} 0%, ${targetBackgroundColor} 100%)
                 }
             }
         }
@@ -777,7 +772,7 @@
         function getAlternateLogos(code, maxAlts = 10) {
           const checks = []
           for (let i = 1; i <= maxAlts; i++) {
-            const url = `team_logos/${code}_Alt${i}.png`
+            const url = team_logos/${code}_Alt${i}.png
             checks.push(
               fetch(url, { method: 'HEAD' })
                 .then(res => res.ok ? url : null)
@@ -918,8 +913,8 @@
             wordmarkDiv.style.backgroundColor = 'white';
             
             const wmImg = document.createElement('img');
-            wmImg.src = `team_logos/${team}_Word.png`;
-            wmImg.alt = `${team} wordmark`;
+            wmImg.src = team_logos/${team}_Word.png;
+            wmImg.alt = ${team} wordmark;
 
             //Drop default margins
             wmImg.style.margin = '0';
@@ -982,15 +977,15 @@
                 const opp   = isHome ? g.away_team_code : g.home_team_code
                 const venue = isHome ? 'vs' : '@'
                 const date  = new Date(g.date).toLocaleDateString()
-                const shots = isHome ? `${g.home_shots||'N/A'}-${g.away_shots||'N/A'}`
-                                     : `${g.away_shots||'N/A'}-${g.home_shots||'N/A'}`
+                const shots = isHome ? ${g.home_shots||'N/A'}-${g.away_shots||'N/A'}
+                                     : ${g.away_shots||'N/A'}-${g.home_shots||'N/A'}
                 
-                let txt = `${date} ${venue} ${opp} ${ts}-${os}`
+                let txt = ${date} ${venue} ${opp} ${ts}-${os}
                 if (ot) txt += ' (OT/SO)'
                 if (pre) txt += ' (Preseason)'
                 if (scoredFirst) txt += ' ⚡First Goal'
                 if (hadComeback) txt += ' 🔥Comeback'
-                if (!shots.includes('N/A')) txt += `\nShots: ${shots}`
+                if (!shots.includes('N/A')) txt += \nShots: ${shots}
                 
                 s.setAttribute('data-tooltip', txt)
 
@@ -1000,34 +995,12 @@
                 scarf.appendChild(s)
             })
 
-            const teamName    = codeToFullName[team]
-            const seasonLabel = season.slice(0,4) + '-' + season.slice(6,8)
-            updateStats(
-              w, l, ow, ol, p,
-              games.length,
-              firstGoalCount,
-              comebackCount,
-              totalGoals,
-              teamName,
-              seasonLabel
-            )
+            updateStats(w, l, ow, ol, p, games.length, firstGoalCount, comebackCount, totalGoals)
         }
 
-        function updateStats(
-            w, l, ow, ol, p,
-            total,
-            firstGoalCount,
-            comebackCount,
-            totalGoals,
-            teamName,
-            seasonLabel
-            ) {
+        function updateStats(w, l, ow, ol, p, total, firstGoalCount, comebackCount, totalGoals) {
             const out = document.getElementById('stats')
             const reg = total - p
-            const leagueFirstGoalAvg = 50.0
-            const firstGoalPct = reg > 0
-            ? ((firstGoalCount / reg) * 100).toFixed(1)
-            : 0
             const pts = w*2 + ow*2 + ol*1
             const pct = reg > 0 ? ((w + ow)/reg * 100).toFixed(1) : 0
             
@@ -1040,7 +1013,7 @@
             const leagueFirstGoalAvg = 50.0 // Teams score first ~50% of the time against any opponent
             const leagueComebackAvg = 15.0 // Teams comeback ~15% of the time
             
-            out.innerHTML = `
+            out.innerHTML = 
                 <div class="stat-card">
                     <div class="stat-value">${w+ow}</div>
                     <div class="stat-label">Total Wins</div>
@@ -1058,14 +1031,9 @@
                     <div class="stat-label">Win Percentage</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">${firstGoalCount}</div>
-                  <div class="stat-label">Scored First</div>
-                  <div class="stat-sublabel">
-                    ${firstGoalPct}% vs ${leagueFirstGoalAvg}% avg
-                  </div>
-                  <div class="stat-blurb">
-                    The ${seasonLabel} ${teamName} had a ${firstGoalPct}% chance to score first.
-                  </div>
+                    <div class="stat-value">${firstGoalCount}</div>
+                    <div class="stat-label">Scored First</div>
+                    <div class="stat-sublabel">${firstGoalPct}% vs ${leagueFirstGoalAvg}% avg</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${comebackCount}</div>
@@ -1085,7 +1053,7 @@
                     <div class="stat-value">${reg}</div>
                     <div class="stat-label">Regular Season Games</div>
                 </div>
-            `
+            
         }
 
         function showTooltip(e) {
