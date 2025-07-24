@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>NHL Season Scarf Generator</title>
+    <title>NHL Season Scarf Generator mk0.1.2</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Ctext y='32' font-size='32'%3E%F0%9F%A7%A3%3C/text%3E%3C/svg%3E">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -211,6 +211,7 @@
             align-items: center;
             justify-content: flex-end;
             padding-right: 2px;
+            overflow: hidden; /* Ensure contents don't spill over */
         
             /* base colour comes from JS via background-color */
             background-repeat: repeat;
@@ -249,12 +250,7 @@
         .scarf-emoji {
             font-size: 6px;
             line-height: 1;
-            position: absolute;
-            z-index: 5;
             text-shadow: 0 0 2px rgba(0,0,0,0.8);
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
         }
         .stats {
             display: grid;
@@ -1338,24 +1334,42 @@
                     const streakIndicator = document.createElement('div')
                     streakIndicator.style.position = 'absolute'
                     streakIndicator.style.right = '2px'
-                    streakIndicator.style.top = '50%'
-                    streakIndicator.style.transform = 'translateY(-50%)'
-                    streakIndicator.style.fontSize = '8px'
+                    streakIndicator.style.top = '1px'  // Changed from 50% to avoid spillover
+                    streakIndicator.style.bottom = '1px'  // Use bottom instead of transform
+                    streakIndicator.style.width = '16px'  // Fixed width to prevent spillover
+                    streakIndicator.style.display = 'flex'
+                    streakIndicator.style.alignItems = 'center'
+                    streakIndicator.style.justifyContent = 'center'
+                    streakIndicator.style.fontSize = '7px'
                     streakIndicator.style.fontWeight = 'bold'
                     streakIndicator.style.color = 'white'
-                    streakIndicator.style.textShadow = '0 0 3px rgba(0,0,0,0.8)'
-                    streakIndicator.style.backgroundColor = 'rgba(0,0,0,0.6)'
-                    streakIndicator.style.padding = '1px 3px'
-                    streakIndicator.style.borderRadius = '3px'
-                    streakIndicator.style.minWidth = '12px'
-                    streakIndicator.style.textAlign = 'center'
+                    streakIndicator.style.textShadow = '0 0 2px rgba(0,0,0,0.8)'
+                    streakIndicator.style.borderRadius = '2px'
                     streakIndicator.style.zIndex = '10'
+                    streakIndicator.style.overflow = 'hidden'  // Prevent any spillover
                     
-                    // Always show the number, never dots
+                    // Color based on streak type and intensity
+                    let backgroundColor
+                    if (streakType === 'win') {
+                        // Green shades getting darker with longer streaks
+                        const greenIntensity = Math.min(streakCount / 10, 1) // Cap at 10 games for max darkness
+                        const greenValue = Math.round(34 + (100 - 34) * (1 - greenIntensity)) // 34 is dark green, 100 is lighter
+                        backgroundColor = `rgb(${Math.round(greenValue * 0.3)}, ${greenValue + 100}, ${Math.round(greenValue * 0.3)})`
+                    } else {
+                        // Red shades getting darker with longer streaks
+                        const redIntensity = Math.min(streakCount / 10, 1) // Cap at 10 games for max darkness
+                        const redValue = Math.round(139 + (200 - 139) * (1 - redIntensity)) // 139 is darker red, 200 is lighter
+                        backgroundColor = `rgb(${redValue + 55}, ${Math.round(redValue * 0.3)}, ${Math.round(redValue * 0.3)})`
+                    }
+                    
+                    streakIndicator.style.backgroundColor = backgroundColor
+                    
+                    // Always show the number
                     streakIndicator.textContent = streakCount.toString()
                     
                     s.appendChild(streakIndicator)
                     s.style.position = 'relative'
+                    s.style.overflow = 'hidden'  // Ensure stripe contains all elements
                 }
                 
                 // Add emojis if applicable
@@ -1368,9 +1382,11 @@
                     emojiSpan.className = 'scarf-emoji'
                     emojiSpan.textContent = emojiText
                     emojiSpan.style.position = 'absolute'
-                    emojiSpan.style.right = '20px' // Move emojis left to make room for streak numbers
-                    emojiSpan.style.top = '50%'
-                    emojiSpan.style.transform = 'translateY(-50%)'
+                    emojiSpan.style.right = streakCount >= 3 && !pre ? '22px' : '4px' // Adjust based on whether streak indicator exists
+                    emojiSpan.style.top = '1px'
+                    emojiSpan.style.bottom = '1px'
+                    emojiSpan.style.display = 'flex'
+                    emojiSpan.style.alignItems = 'center'
                     emojiSpan.style.zIndex = '5'
                     s.appendChild(emojiSpan)
                 }
