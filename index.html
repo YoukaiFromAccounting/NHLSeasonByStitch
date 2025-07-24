@@ -249,9 +249,12 @@
         .scarf-emoji {
             font-size: 6px;
             line-height: 1;
-            position: relative;
-            z-index: 3;
+            position: absolute;
+            z-index: 5;
             text-shadow: 0 0 2px rgba(0,0,0,0.8);
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
         }
         .stats {
             display: grid;
@@ -1108,6 +1111,7 @@
                 element.style.animation = ''
             }, 500)
         }
+
 
         function populateColourSelectors() {
             const code = document.getElementById('teamSelect').value
