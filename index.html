@@ -929,7 +929,7 @@
             //DEBUG
             const mid = Math.floor(games.length/2);
             
-            games.forEach(g => {
+            games.forEach((g, index) => {
                 const s = document.createElement('div')
                 s.className = 'scarf-stripe'
                 const isHome = g.home_team_code === team
@@ -961,7 +961,45 @@
                 if (!pre) { // Only count regular season/playoff goals
                     totalGoals += ts
                 }
-
+                
+                // Add streak detection
+                let streakCount = 1
+                let streakType = won ? 'win' : 'loss'
+                
+                // Look backwards to count streak
+                for (let i = index - 1; i >= 0; i--) {
+                    const prevGame = games[i]
+                    if (prevGame.game_type === '1') continue // Skip preseason
+                    
+                    const prevIsHome = prevGame.home_team_code === team
+                    const prevWon = +(prevIsHome ? prevGame.home_score : prevGame.away_score) > 
+                                   +(prevIsHome ? prevGame.away_score : prevGame.home_score)
+                    
+                    if ((streakType === 'win' && prevWon) || (streakType === 'loss' && !prevWon)) {
+                        streakCount++
+                    } else {
+                        break
+                    }
+                }
+                
+                // Add streak indicator for streaks of 3+
+                if (streakCount >= 3 && !pre) {
+                    const streakIndicator = document.createElement('div')
+                    streakIndicator.style.position = 'absolute'
+                    streakIndicator.style.right = '5px'
+                    streakIndicator.style.top = '50%'
+                    streakIndicator.style.transform = 'translateY(-50%)'
+                    streakIndicator.style.fontSize = '8px'
+                    streakIndicator.style.fontWeight = 'bold'
+                    streakIndicator.style.color = 'white'
+                    streakIndicator.style.textShadow = '0 0 3px rgba(0,0,0,0.8)'
+                    streakIndicator.textContent = streakCount >= 5 ? `${streakCount}` : '●'
+                    s.appendChild(streakIndicator)
+                    
+                    // Make stripe position relative for absolute positioning
+                    s.style.position = 'relative'
+                }
+                
                 // Add emojis if applicable
                 let emojiText = ''
                 if (scoredFirst) emojiText += '⚡'
