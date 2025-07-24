@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>NHL Season Scarf Generator mk0.1.2</title>
+    <title>NHL Season Scarf Generator</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Ctext y='32' font-size='32'%3E%F0%9F%A7%A3%3C/text%3E%3C/svg%3E">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -589,6 +589,12 @@
             }
         })
 
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDataFromGitHub()
+            loadTeamColours()
+            createFloatingLogos()
+            addToggleControls() // Add this line
+        })
 
         // Handle window resize to update carousel positioning
         window.addEventListener('resize', () => {
@@ -1225,6 +1231,63 @@
             document.getElementById('colourControls').style.display = 'flex'
         }
 
+        //Toggle additional info on/off
+        function addToggleControls() {
+            const controlsDiv = document.querySelector('.controls')
+            
+            // Create toggle controls container
+            const toggleContainer = document.createElement('div')
+            toggleContainer.style.cssText = `
+                display: flex;
+                gap: 20px;
+                align-items: center;
+                flex-wrap: wrap;
+                margin-top: 10px;
+                padding: 15px;
+                background: rgba(255, 255, 255, 0.5);
+                border-radius: 8px;
+                border: 1px solid #e0e0e0;
+            `
+            
+            // Emoji toggle
+            const emojiToggleGroup = document.createElement('div')
+            emojiToggleGroup.className = 'control-group'
+            emojiToggleGroup.innerHTML = `
+                <label for="emojiToggle" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="emojiToggle" checked style="transform: scale(1.2);">
+                    <span>Show Emojis (⚡🔥)</span>
+                </label>
+            `
+            
+            // Streak toggle
+            const streakToggleGroup = document.createElement('div')
+            streakToggleGroup.className = 'control-group'
+            streakToggleGroup.innerHTML = `
+                <label for="streakToggle" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="streakToggle" checked style="transform: scale(1.2);">
+                    <span>Show Streaks (3+)</span>
+                </label>
+            `
+            
+            toggleContainer.appendChild(emojiToggleGroup)
+            toggleContainer.appendChild(streakToggleGroup)
+            
+            // Insert after the main controls
+            controlsDiv.appendChild(toggleContainer)
+            
+            // Add event listeners
+            document.getElementById('emojiToggle').addEventListener('change', function() {
+                if (document.getElementById('scarf').innerHTML) {
+                    generateScarf() // Regenerate if scarf already exists
+                }
+            })
+            
+            document.getElementById('streakToggle').addEventListener('change', function() {
+                if (document.getElementById('scarf').innerHTML) {
+                    generateScarf() // Regenerate if scarf already exists
+                }
+            })
+        }
         function generateScarf() {
             colors.win       = document.getElementById('winColorSelect').value
             colors.loss      = document.getElementById('lossColorSelect').value
@@ -1235,6 +1298,11 @@
             const team = document.getElementById('teamSelect').value
             const season = document.getElementById('seasonSelect').value
             const width = document.getElementById('scarfWidth').value
+
+            // Get toggle states
+            const showEmojis = document.getElementById('emojiToggle')?.checked ?? true
+            const showStreaks = document.getElementById('streakToggle')?.checked ?? true
+            
             if (!season) return alert('Please select a season first')
             if (!team)   return alert('Please select a team first')
             if (!gameData.length) return alert('Data still loading, wait a moment')
@@ -1314,23 +1382,27 @@
                 let streakType = won ? 'win' : 'loss'
                 
                 // Look backwards to count streak
-                for (let i = index - 1; i >= 0; i--) {
-                    const prevGame = games[i]
-                    if (prevGame.game_type === '1') continue // Skip preseason
-                    
-                    const prevIsHome = prevGame.home_team_code === team
-                    const prevWon = +(prevIsHome ? prevGame.home_score : prevGame.away_score) > 
-                                   +(prevIsHome ? prevGame.away_score : prevGame.home_score)
-                    
-                    if ((streakType === 'win' && prevWon) || (streakType === 'loss' && !prevWon)) {
-                        streakCount++
-                    } else {
-                        break
+                if (showStreaks) {
+                    // Look backwards to count streak
+                    for (let i = index - 1; i >= 0; i--) {
+                        const prevGame = games[i]
+                        if (prevGame.game_type === '1') continue // Skip preseason
+                        
+                        const prevIsHome = prevGame.home_team_code === team
+                        const prevWon = +(prevIsHome ? prevGame.home_score : prevGame.away_score) > 
+                                       +(prevIsHome ? prevGame.away_score : prevGame.home_score)
+                        
+                        if ((streakType === 'win' && prevWon) || (streakType === 'loss' && !prevWon)) {
+                            streakCount++
+                        } else {
+                            break
+                        }
                     }
                 }
+
                 
                 // Add streak indicator for streaks of 3+
-                if (streakCount >= 3 && !pre) {
+                if (showStreaks && streakCount >= 3 && !pre) {
                     const streakIndicator = document.createElement('div')
                     streakIndicator.style.position = 'absolute'
                     streakIndicator.style.right = '2px'
@@ -1373,22 +1445,24 @@
                 }
                 
                 // Add emojis if applicable
-                let emojiText = ''
-                if (scoredFirst) emojiText += '⚡'
-                if (hadComeback) emojiText += '🔥'
-
-                if (emojiText) {
-                    const emojiSpan = document.createElement('span')
-                    emojiSpan.className = 'scarf-emoji'
-                    emojiSpan.textContent = emojiText
-                    emojiSpan.style.position = 'absolute'
-                    emojiSpan.style.right = streakCount >= 3 && !pre ? '22px' : '4px' // Adjust based on whether streak indicator exists
-                    emojiSpan.style.top = '1px'
-                    emojiSpan.style.bottom = '1px'
-                    emojiSpan.style.display = 'flex'
-                    emojiSpan.style.alignItems = 'center'
-                    emojiSpan.style.zIndex = '5'
-                    s.appendChild(emojiSpan)
+                if (showEmojis) {
+                    let emojiText = ''
+                    if (scoredFirst) emojiText += '⚡'
+                    if (hadComeback) emojiText += '🔥'
+        
+                    if (emojiText) {
+                        const emojiSpan = document.createElement('span')
+                        emojiSpan.className = 'scarf-emoji'
+                        emojiSpan.textContent = emojiText
+                        emojiSpan.style.position = 'absolute'
+                        emojiSpan.style.right = (showStreaks && streakCount >= 3 && !pre) ? '22px' : '4px'
+                        emojiSpan.style.top = '1px'
+                        emojiSpan.style.bottom = '1px'
+                        emojiSpan.style.display = 'flex'
+                        emojiSpan.style.alignItems = 'center'
+                        emojiSpan.style.zIndex = '5'
+                        s.appendChild(emojiSpan)
+                    }
                 }
 
                 const opp   = isHome ? g.away_team_code : g.home_team_code
