@@ -165,12 +165,36 @@
             align-items: center;
             justify-content: center;
             opacity: 0.8;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: grab;
+            user-select: none;
+            position: relative;
+            z-index: 1;
         }
         
         .scarf-side-logo:hover {
-            transform: scale(1.1);
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
+        
+        .scarf-side-logo.dragging {
+            cursor: grabbing;
+            transform: scale(1.1) rotate(5deg);
+            z-index: 1000;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            opacity: 0.9;
+        }
+        
+        .scarf-side-logo.drop-target {
+            transform: scale(1.15);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+            border: 3px solid #667eea;
+        }
+        
+        .scarf-side-logo.swapping {
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
         .scarf {
             border: 3px solid #34495e;
             border-radius: 12px;
@@ -310,6 +334,11 @@
                 width: 80px;
                 height: 80px;
             }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px) rotate(-2deg); }
+            75% { transform: translateX(10px) rotate(2deg); }
         }
     </style>
 </head>
@@ -784,58 +813,300 @@
         }
         
         function createScarfSideLogos(teamCode) {
-          const container = document.getElementById('scarfSideLogos')
-          container.innerHTML = ''
-          if (!teamCode || !teamLogos[teamCode]) {
-            container.style.display = 'none'
-            return
-          }
+            const container = document.getElementById('scarfSideLogos')
+            container.innerHTML = ''
+            if (!teamCode || !teamLogos[teamCode]) {
+                container.style.display = 'none'
+                return
+            }
         
-          // 1. get primary immediately
-          const primary = teamLogos[teamCode]
-          // 2. get alternates via Promise
-          getAlternateLogos(teamCode, 10)
-            .then(alts => {
-              const allLogos = [primary].concat(alts)
-              allLogos.forEach(logoUrl => {
-                const logoDiv = document.createElement('div')
-                logoDiv.className = 'scarf-side-logo'
-                const img = document.createElement('img')
-                img.src = logoUrl
-                img.alt = teamCode
-                img.style.width = '100%'
-                img.style.height = '100%'
-                img.style.objectFit = 'contain'
-                img.onerror = function() {
-                  this.style.display = 'none'
-                  const fallback = document.createElement('div')
-                  fallback.textContent = '🏒'
-                  fallback.style.fontSize = '120px'
-                  fallback.style.display = 'flex'
-                  fallback.style.alignItems = 'center'
-                  fallback.style.justifyContent = 'center'
-                  this.parentNode.appendChild(fallback)
+            // Get primary and alternate logos
+            const primary = teamLogos[teamCode]
+            getAlternateLogos(teamCode, 10)
+                .then(alts => {
+                    const allLogos = [primary].concat(alts)
+                    
+                    allLogos.forEach((logoUrl, index) => {
+                        const logoDiv = document.createElement('div')
+                        logoDiv.className = 'scarf-side-logo'
+                        logoDiv.draggable = true
+                        logoDiv.dataset.logoIndex = index
+                        logoDiv.dataset.logoUrl = logoUrl
+                        
+                        const img = document.createElement('img')
+                        img.src = logoUrl
+                        img.alt = teamCode
+                        img.style.width = '100%'
+                        img.style.height = '100%'
+                        img.style.objectFit = 'contain'
+                        img.style.pointerEvents = 'none' // Prevent img from interfering with drag
+                        
+                        img.onerror = function() {
+                            this.style.display = 'none'
+                            const fallback = document.createElement('div')
+                            fallback.textContent = '🏒'
+                            fallback.style.fontSize = '120px'
+                            fallback.style.display = 'flex'
+                            fallback.style.alignItems = 'center'
+                            fallback.style.justifyContent = 'center'
+                            fallback.style.pointerEvents = 'none'
+                            this.parentNode.appendChild(fallback)
+                        }
+                        
+                        logoDiv.appendChild(img)
+                        
+                        // Add drag event listeners
+                        setupDragEvents(logoDiv)
+                        
+                        container.appendChild(logoDiv)
+                    })
+                    
+                    container.style.display = 'flex'
+                })
+                .catch(err => {
+                    console.error('Error loading alternate logos', err)
+                    // Fallback to primary logo only
+                    const logoDiv = document.createElement('div')
+                    logoDiv.className = 'scarf-side-logo'
+                    logoDiv.draggable = true
+                    logoDiv.dataset.logoIndex = 0
+                    logoDiv.dataset.logoUrl = primary
+                    
+                    const img = document.createElement('img')
+                    img.src = primary
+                    img.alt = teamCode
+                    img.style.width = '100%'
+                    img.style.height = '100%'
+                    img.style.objectFit = 'contain'
+                    img.style.pointerEvents = 'none'
+                    
+                    logoDiv.appendChild(img)
+                    setupDragEvents(logoDiv)
+                    container.appendChild(logoDiv)
+                    container.style.display = 'flex'
+                })
+        }
+        
+        // Drag and drop functionality
+        let draggedElement = null
+        let dragStartY = 0
+        
+        function setupDragEvents(logoDiv) {
+            // Mouse events
+            logoDiv.addEventListener('dragstart', handleDragStart)
+            logoDiv.addEventListener('dragover', handleDragOver)
+            logoDiv.addEventListener('drop', handleDrop)
+            logoDiv.addEventListener('dragend', handleDragEnd)
+            logoDiv.addEventListener('dragenter', handleDragEnter)
+            logoDiv.addEventListener('dragleave', handleDragLeave)
+            
+            // Touch events for mobile
+            logoDiv.addEventListener('touchstart', handleTouchStart, { passive: false })
+            logoDiv.addEventListener('touchmove', handleTouchMove, { passive: false })
+            logoDiv.addEventListener('touchend', handleTouchEnd)
+        }
+        
+        function handleDragStart(e) {
+            draggedElement = this
+            this.classList.add('dragging')
+            
+            // Store original position for smooth animation
+            const rect = this.getBoundingClientRect()
+            dragStartY = rect.top
+            
+            // Set drag effect
+            e.dataTransfer.effectAllowed = 'move'
+            e.dataTransfer.setData('text/html', this.outerHTML)
+            
+            // Add a slight delay to show the dragging state
+            setTimeout(() => {
+                if (draggedElement) {
+                    draggedElement.style.opacity = '0.5'
                 }
-                logoDiv.appendChild(img)
-                container.appendChild(logoDiv)
-              })
-              container.style.display = 'flex'
+            }, 0)
+        }
+        
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault()
+            }
+            e.dataTransfer.dropEffect = 'move'
+            return false
+        }
+        
+        function handleDragEnter(e) {
+            if (this !== draggedElement) {
+                this.classList.add('drop-target')
+            }
+        }
+        
+        function handleDragLeave(e) {
+            this.classList.remove('drop-target')
+        }
+        
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation()
+            }
+            
+            this.classList.remove('drop-target')
+            
+            if (draggedElement && this !== draggedElement) {
+                swapLogos(draggedElement, this)
+            }
+            
+            return false
+        }
+        
+        function handleDragEnd(e) {
+            // Clean up all dragging states
+            document.querySelectorAll('.scarf-side-logo').forEach(logo => {
+                logo.classList.remove('dragging', 'drop-target')
+                logo.style.opacity = ''
             })
-            .catch(err => {
-              console.error('Error loading alternate logos', err)
-              // still show primary
-              const logoDiv = document.createElement('div')
-              logoDiv.className = 'scarf-side-logo'
-              const img = document.createElement('img')
-              img.src = primary
-              img.alt = teamCode
-              img.style.width = '100%'
-              img.style.height = '100%'
-              img.style.objectFit = 'contain'
-              logoDiv.appendChild(img)
-              container.appendChild(logoDiv)
-              container.style.display = 'flex'
+            
+            draggedElement = null
+        }
+        
+        // Touch events for mobile support
+        let touchStartElement = null
+        let touchY = 0
+        
+        function handleTouchStart(e) {
+            touchStartElement = this
+            touchY = e.touches[0].clientY
+            this.classList.add('dragging')
+        }
+        
+        function handleTouchMove(e) {
+            e.preventDefault()
+            if (!touchStartElement) return
+            
+            const touch = e.touches[0]
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
+            
+            // Remove previous drop targets
+            document.querySelectorAll('.drop-target').forEach(el => {
+                el.classList.remove('drop-target')
             })
+            
+            // Add drop target if over another logo
+            if (elementBelow && elementBelow.classList.contains('scarf-side-logo') && 
+                elementBelow !== touchStartElement) {
+                elementBelow.classList.add('drop-target')
+            }
+        }
+        
+        function handleTouchEnd(e) {
+            if (!touchStartElement) return
+            
+            const touch = e.changedTouches[0]
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
+            
+            // Clean up classes
+            document.querySelectorAll('.scarf-side-logo').forEach(logo => {
+                logo.classList.remove('dragging', 'drop-target')
+            })
+            
+            // Perform swap if dropped on another logo
+            if (elementBelow && elementBelow.classList.contains('scarf-side-logo') && 
+                elementBelow !== touchStartElement) {
+                swapLogos(touchStartElement, elementBelow)
+            }
+            
+            touchStartElement = null
+        }
+        
+        function swapLogos(logo1, logo2) {
+            // Add swapping animation class
+            logo1.classList.add('swapping')
+            logo2.classList.add('swapping')
+            
+            // Get current positions
+            const container = document.getElementById('scarfSideLogos')
+            const logos = Array.from(container.children)
+            const index1 = logos.indexOf(logo1)
+            const index2 = logos.indexOf(logo2)
+            
+            // Create a smooth swap animation
+            const rect1 = logo1.getBoundingClientRect()
+            const rect2 = logo2.getBoundingClientRect()
+            const deltaY = rect2.top - rect1.top
+            
+            // Animate the swap
+            logo1.style.transform = `translateY(${deltaY}px) scale(1.1)`
+            logo2.style.transform = `translateY(${-deltaY}px) scale(1.1)`
+            
+            setTimeout(() => {
+                // Actually swap the DOM elements
+                if (index1 < index2) {
+                    container.insertBefore(logo2, logo1)
+                    container.insertBefore(logo1, logos[index2 + 1])
+                } else {
+                    container.insertBefore(logo1, logo2)
+                    container.insertBefore(logo2, logos[index1 + 1])
+                }
+                
+                // Reset transforms and remove animation classes
+                logo1.style.transform = ''
+                logo2.style.transform = ''
+                
+                setTimeout(() => {
+                    logo1.classList.remove('swapping')
+                    logo2.classList.remove('swapping')
+                }, 100)
+                
+            }, 300) // Half of the CSS transition time
+            
+            // Add a little celebratory effect
+            createSwapEffect(logo1, logo2)
+        }
+        
+        function createSwapEffect(logo1, logo2) {
+            // Create particle effect for successful swap
+            [logo1, logo2].forEach(logo => {
+                for (let i = 0; i < 6; i++) {
+                    const particle = document.createElement('div')
+                    particle.style.cssText = `
+                        position: absolute;
+                        width: 8px;
+                        height: 8px;
+                        background: #667eea;
+                        border-radius: 50%;
+                        pointer-events: none;
+                        z-index: 1001;
+                    `
+                    
+                    const rect = logo.getBoundingClientRect()
+                    particle.style.left = (rect.left + rect.width/2) + 'px'
+                    particle.style.top = (rect.top + rect.height/2) + 'px'
+                    
+                    document.body.appendChild(particle)
+                    
+                    // Animate particle
+                    const angle = (i / 6) * Math.PI * 2
+                    const distance = 50 + Math.random() * 30
+                    const endX = rect.left + rect.width/2 + Math.cos(angle) * distance
+                    const endY = rect.top + rect.height/2 + Math.sin(angle) * distance
+                    
+                    particle.animate([
+                        { transform: 'scale(0)', opacity: 1 },
+                        { transform: 'scale(1)', opacity: 1, offset: 0.3 },
+                        { transform: `scale(0) translate(${endX - rect.left - rect.width/2}px, ${endY - rect.top - rect.height/2}px)`, opacity: 0 }
+                    ], {
+                        duration: 800,
+                        easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                    }).onfinish = () => particle.remove()
+                }
+            })
+        }
+        
+        // Add shake animation when trying to drag onto self
+        function addShakeAnimation(element) {
+            element.style.animation = 'shake 0.5s ease-in-out'
+            setTimeout(() => {
+                element.style.animation = ''
+            }, 500)
         }
 
         function populateColourSelectors() {
@@ -1093,7 +1364,26 @@
                 </div>
             `
         }
-
+        // Add double-tap to shuffle all logos
+        function shuffleLogos() {
+            const container = document.getElementById('scarfSideLogos')
+            const logos = Array.from(container.children)
+            
+            // Fisher-Yates shuffle
+            for (let i = logos.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1))
+                container.appendChild(logos[j])
+            }
+            
+            // Add shuffle effect
+            logos.forEach((logo, index) => {
+                logo.style.transform = `scale(0.8) rotate(${Math.random() * 720 - 360}deg)`
+                setTimeout(() => {
+                    logo.style.transform = ''
+                }, 300 + index * 50)
+            })
+        }
+        
         function showTooltip(e) {
             const tip = document.getElementById('tooltip')
             tip.textContent = e.target.getAttribute('data-tooltip')
