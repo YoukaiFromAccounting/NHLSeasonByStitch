@@ -438,6 +438,12 @@
             <div class="legend-item">
                 <span>🔥 Comeback</span>
             </div>
+            <div class="legend-item">
+                <span>6️⃣ Original Six</span>
+            </div>
+            <div class="legend-item">
+                <span>⚔️ Rivalry</span>
+            </div>
         </div>
 
         <div class="scarf-container">
@@ -471,6 +477,7 @@
         let mouseVelocityY = 0
         let swayAnimationId = null
         let velocityHistory = []
+        let rivalriesData = []
 
         // NHL team logos (using local PNG logo files)
         const teamLogos = {
@@ -596,7 +603,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadDataFromGitHub()
             loadTeamColours()
+            loadRivalries() 
             createFloatingLogos()
+            addToggleControls()
         })
         document.addEventListener('dragover', (e) => {
             e.preventDefault()
@@ -786,7 +795,28 @@
                 }))
                 .catch(console.error)
         }
-
+        function loadRivalries() {
+            fetch('nhl_rivalries.csv')
+                .then(r => r.ok ? r.text() : Promise.reject('Could not load rivalries'))
+                .then(txt => Papa.parse(txt, {
+                    header: true,
+                    complete(res) {
+                        rivalriesData = res.data.filter(r => r.team1code && r.team2code)
+                    }
+                }))
+                .catch(console.error)
+        }
+        function isOriginalSix(teamCode) {
+            const originalSix = ['CHI', 'TOR', 'DET', 'MTL', 'BOS', 'NYR']
+            return originalSix.includes(teamCode)
+        }
+        
+        function areRivals(team1, team2) {
+            return rivalriesData.some(rivalry => 
+                (rivalry.team1code === team1 && rivalry.team2code === team2) ||
+                (rivalry.team1code === team2 && rivalry.team2code === team1)
+            )
+        }
         function loadDataFromGitHub() {
             fetch('nhl_complete_1994_2025.csv')
                 .then(r => r.ok ? r.text() : Promise.reject('Game CSV not found'))
@@ -1596,7 +1626,15 @@
                     let emojiText = ''
                     if (scoredFirst) emojiText += '⚡'
                     if (hadComeback) emojiText += '🔥'
-        
+
+                    // Check for Original Six matchup
+                    if (isOriginalSix(team) && isOriginalSix(opp)) {
+                        emojiText += '6️⃣'
+                    }
+                    // Check for rivalry matchup
+                    if (areRivals(team, opp)) {
+                        emojiText += '⚔️'
+                    }
                     if (emojiText) {
                         const emojiSpan = document.createElement('span')
                         emojiSpan.className = 'scarf-emoji'
