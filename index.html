@@ -999,19 +999,19 @@
         function updateCustomDragElement(mouseX, mouseY) {
             if (!customDragElement) return
             
-            // Calculate instantaneous velocity (how fast mouse is moving right now)
-            const deltaTime = 16 // Assume ~60fps (16ms per frame)
+            // More sensitive velocity calculation for bigger reactions
+            const deltaTime = 12 // Slightly less smoothing for more immediate response
             const rawVelocityX = (mouseX - lastMouseX) / deltaTime
             const rawVelocityY = (mouseY - lastMouseY) / deltaTime
             
-            // Smooth the velocity slightly to avoid jitter, but keep it responsive
-            mouseVelocityX = mouseVelocityX * 0.3 + rawVelocityX * 0.7
-            mouseVelocityY = mouseVelocityY * 0.3 + rawVelocityY * 0.7
+            // Less smoothing = more dramatic, immediate reactions
+            mouseVelocityX = mouseVelocityX * 0.2 + rawVelocityX * 0.8  // More responsive
+            mouseVelocityY = mouseVelocityY * 0.2 + rawVelocityY * 0.8
             
             lastMouseX = mouseX
             lastMouseY = mouseY
             
-            // Update position immediately
+            // Update position
             customDragElement.style.left = (mouseX - dragOffsetX) + 'px'
             customDragElement.style.top = (mouseY - dragOffsetY) + 'px'
         }
@@ -1024,24 +1024,29 @@
                     return
                 }
                 
-                // Calculate sway based ONLY on current mouse velocity (opposite direction for physics)
-                const swayInfluence = 1.2  // How dramatically it reacts to mouse movement
-                const maxSway = 30         // Maximum sway angle
+                // SUPER EXAGGERATED sway settings
+                const swayInfluence = 3.5  // Cranked way up for dramatic effect
+                const maxSway = 60         // Allow much more rotation (was 30)
+                const tiltInfluence = 1.2  // More dramatic tilting too
+                const maxTilt = 25         // More tilt range
                 
-                // Direct reaction to mouse velocity - if you move left, logo sways right
+                // SUPER reactive sway - if you move left, logo swings RIGHT dramatically
                 const swayRotation = Math.max(-maxSway, Math.min(maxSway, -mouseVelocityX * swayInfluence))
-                const swayTilt = Math.max(-10, Math.min(10, -mouseVelocityY * swayInfluence * 0.3))
+                const swayTilt = Math.max(-maxTilt, Math.min(maxTilt, -mouseVelocityY * tiltInfluence))
                 
-                // Apply transform - no wobble, just direct response to mouse movement
-                const scale = 1.05
+                // Add some extra effects for more drama
+                const swayMagnitude = Math.abs(swayRotation)
+                const dynamicScale = 1.05 + (swayMagnitude / maxSway) * 0.15 // Scale more with bigger sway
+                
+                // Apply SUPER dramatic transform
                 customDragElement.style.transform = 
                     `rotate(${swayRotation}deg) 
                      rotateX(${swayTilt}deg) 
-                     scale(${scale})`
+                     scale(${dynamicScale})`
                 
-                // Gradually reduce velocity so it settles when mouse stops moving
-                mouseVelocityX *= 0.90  // Dampen velocity
-                mouseVelocityY *= 0.90
+                // Slower damping so the sway lasts longer and feels more "wobbly"
+                mouseVelocityX *= 0.94  // Less damping = more persistent sway
+                mouseVelocityY *= 0.94
                 
                 swayAnimationId = requestAnimationFrame(animate)
             }
