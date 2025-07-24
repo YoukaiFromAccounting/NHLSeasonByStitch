@@ -626,13 +626,6 @@
                 }
             }
         })
-        document.addEventListener('DOMContentLoaded', () => {
-            loadDataFromGitHub()
-            loadTeamColours()
-            createFloatingLogos()
-            addToggleControls() // Add this line
-        })
-
         // Handle window resize to update carousel positioning
         window.addEventListener('resize', () => {
             // Recreate logos with new positioning for carousel
