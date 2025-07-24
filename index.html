@@ -195,16 +195,18 @@
         /* Custom floating drag logo */
         .floating-drag-logo {
             position: fixed;
-            width: 120px;
-            height: 120px;
+            width: 240px;  /* Same as original */
+            height: 240px; /* Same as original */
             pointer-events: none;
             z-index: 9999;
-            opacity: 0.8;
+            opacity: 0.9;  /* Slightly more opaque to feel "real" */
             border-radius: 50%;
-            transition: transform 0.1s ease-out;
+            transition: none; /* Remove transition for immediate response */
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
+            /* Add shadow to make it feel lifted */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
         .scarf {
             border: 3px solid #34495e;
@@ -470,6 +472,7 @@
         let mouseVelocityX = 0
         let mouseVelocityY = 0
         let swayAnimationId = null
+        let velocityHistory = []
 
         // NHL team logos (using local PNG logo files)
         const teamLogos = {
@@ -610,6 +613,11 @@
         document.addEventListener('dragover', (e) => {
             e.preventDefault()
             if (customDragElement) {
+                updateCustomDragElement(e.clientX, e.clientY)
+            }
+        })
+        document.addEventListener('mousemove', (e) => {
+            if (customDragElement && draggedElement) {
                 updateCustomDragElement(e.clientX, e.clientY)
             }
         })
@@ -951,7 +959,7 @@
             emptyImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
             e.dataTransfer.setDragImage(emptyImg, 0, 0)
             
-            // Create custom floating drag element
+            // Create custom floating drag element - same size as original
             createCustomDragElement(this, e.clientX, e.clientY)
             
             // Initialize mouse tracking
@@ -959,12 +967,13 @@
             lastMouseY = e.clientY
             mouseVelocityX = 0
             mouseVelocityY = 0
+            velocityHistory = []
             
             e.dataTransfer.effectAllowed = 'move'
             e.dataTransfer.setData('text/html', this.outerHTML)
             
-            // Start sway animation
-            startSwayAnimation()
+            // Start enhanced sway animation
+            startEnhancedSwayAnimation()
         }
         function createCustomDragElement(originalElement, mouseX, mouseY) {
             // Remove any existing custom drag element
@@ -975,15 +984,15 @@
             customDragElement = document.createElement('div')
             customDragElement.className = 'floating-drag-logo'
             
-            // Copy the background image from the original
+            // Copy the exact appearance from the original
             const img = originalElement.querySelector('img')
             if (img && img.src) {
                 customDragElement.style.backgroundImage = `url(${img.src})`
             }
             
-            // Position at mouse
-            dragOffsetX = 60 // Half of the drag element width
-            dragOffsetY = 60 // Half of the drag element height
+            // Position at mouse (center the logo on cursor)
+            dragOffsetX = 120 // Half of 240px
+            dragOffsetY = 120 // Half of 240px
             customDragElement.style.left = (mouseX - dragOffsetX) + 'px'
             customDragElement.style.top = (mouseY - dragOffsetY) + 'px'
             
@@ -992,15 +1001,75 @@
         function updateCustomDragElement(mouseX, mouseY) {
             if (!customDragElement) return
             
-            // Calculate velocity for sway
-            mouseVelocityX = mouseX - lastMouseX
-            mouseVelocityY = mouseY - lastMouseY
+            // Calculate velocity with higher sensitivity
+            const newVelocityX = (mouseX - lastMouseX) * 2 // Amplify velocity
+            const newVelocityY = (mouseY - lastMouseY) * 2
+            
+            // Keep velocity history for smoother motion
+            velocityHistory.push({ x: newVelocityX, y: newVelocityY })
+            if (velocityHistory.length > 5) {
+                velocityHistory.shift()
+            }
+            
+            // Average recent velocities for smoother sway
+            mouseVelocityX = velocityHistory.reduce((sum, v) => sum + v.x, 0) / velocityHistory.length
+            mouseVelocityY = velocityHistory.reduce((sum, v) => sum + v.y, 0) / velocityHistory.length
+            
             lastMouseX = mouseX
             lastMouseY = mouseY
             
-            // Update position
+            // Update position immediately
             customDragElement.style.left = (mouseX - dragOffsetX) + 'px'
             customDragElement.style.top = (mouseY - dragOffsetY) + 'px'
+        }
+        function startEnhancedSwayAnimation() {
+            if (swayAnimationId) return
+            
+            let swayMomentumX = 0
+            let swayMomentumY = 0
+            
+            function animate() {
+                if (!customDragElement) {
+                    swayAnimationId = null
+                    return
+                }
+                
+                // Enhanced sway calculation with momentum
+                const swayInfluence = 0.8 // How much velocity affects sway
+                const swayDamping = 0.92   // How quickly sway dampens
+                const maxSway = 35         // Maximum sway angle
+                
+                // Add current velocity to momentum
+                swayMomentumX += mouseVelocityX * swayInfluence
+                swayMomentumY += mouseVelocityY * swayInfluence
+                
+                // Apply damping to momentum
+                swayMomentumX *= swayDamping
+                swayMomentumY *= swayDamping
+                
+                // Calculate sway angles (opposite direction for realistic physics)
+                const swayRotation = Math.max(-maxSway, Math.min(maxSway, -swayMomentumX))
+                const swayTilt = Math.max(-15, Math.min(15, -swayMomentumY * 0.5))
+                
+                // Add slight wobble for more life-like movement
+                const time = Date.now() * 0.003
+                const wobble = Math.sin(time) * 2
+                
+                // Apply enhanced transform with multiple effects
+                const scale = 1.05 + Math.abs(swayRotation) * 0.01 // Slight scale based on sway
+                customDragElement.style.transform = 
+                    `rotate(${swayRotation + wobble}deg) 
+                     rotateX(${swayTilt}deg) 
+                     scale(${scale})`
+                
+                // Dampen the base velocity more gradually
+                mouseVelocityX *= 0.85
+                mouseVelocityY *= 0.85
+                
+                swayAnimationId = requestAnimationFrame(animate)
+            }
+            
+            animate()
         }
         function handleDragOver(e) {
             if (e.preventDefault) {
@@ -1038,19 +1107,36 @@
         }
         
         function handleDragEnd(e) {
+            // Enhanced cleanup with exit animation
+            if (customDragElement && swayAnimationId) {
+                // Add a quick "drop" animation before removing
+                customDragElement.animate([
+                    { 
+                        transform: customDragElement.style.transform,
+                        opacity: 0.9 
+                    },
+                    { 
+                        transform: 'rotate(0deg) rotateX(0deg) scale(0.8)',
+                        opacity: 0 
+                    }
+                ], {
+                    duration: 200,
+                    easing: 'ease-out'
+                }).onfinish = () => {
+                    if (customDragElement) {
+                        customDragElement.remove()
+                        customDragElement = null
+                    }
+                }
+            }
+            
             // Stop sway animation
             if (swayAnimationId) {
                 cancelAnimationFrame(swayAnimationId)
                 swayAnimationId = null
             }
             
-            // Remove custom drag element
-            if (customDragElement) {
-                customDragElement.remove()
-                customDragElement = null
-            }
-            
-            // Clean up all dragging states
+            // Clean up states
             document.querySelectorAll('.scarf-side-logo').forEach(logo => {
                 logo.classList.remove('dragging', 'drop-target')
                 logo.style.opacity = ''
@@ -1058,6 +1144,7 @@
             })
             
             draggedElement = null
+            velocityHistory = []
         }
         
         // Touch events for mobile support
@@ -1098,16 +1185,14 @@
             this.classList.add('dragging')
             
             const touch = e.touches[0]
-            
-            // Create custom drag element for touch
             createCustomDragElement(this, touch.clientX, touch.clientY)
             
-            // Initialize touch tracking
             lastMouseX = touch.clientX
             lastMouseY = touch.clientY
             mouseVelocityX = 0
             mouseVelocityY = 0
-            startSwayAnimation()
+            velocityHistory = []
+            startEnhancedSwayAnimation()
         }
         
         function handleTouchMove(e) {
@@ -1115,11 +1200,9 @@
             if (!touchStartElement || !customDragElement) return
             
             const touch = e.touches[0]
-            
-            // Update custom drag element
             updateCustomDragElement(touch.clientX, touch.clientY)
             
-            // Check for drop targets
+            // Drop target detection
             const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
             
             document.querySelectorAll('.drop-target').forEach(el => {
@@ -1132,20 +1215,34 @@
             }
         }
 
-        
         function handleTouchEnd(e) {
             if (!touchStartElement) return
             
-            // Stop sway animation
+            // Same enhanced cleanup as mouse events
+            if (customDragElement && swayAnimationId) {
+                customDragElement.animate([
+                    { 
+                        transform: customDragElement.style.transform,
+                        opacity: 0.9 
+                    },
+                    { 
+                        transform: 'rotate(0deg) rotateX(0deg) scale(0.8)',
+                        opacity: 0 
+                    }
+                ], {
+                    duration: 200,
+                    easing: 'ease-out'
+                }).onfinish = () => {
+                    if (customDragElement) {
+                        customDragElement.remove()
+                        customDragElement = null
+                    }
+                }
+            }
+            
             if (swayAnimationId) {
                 cancelAnimationFrame(swayAnimationId)
                 swayAnimationId = null
-            }
-            
-            // Remove custom drag element
-            if (customDragElement) {
-                customDragElement.remove()
-                customDragElement = null
             }
             
             const touch = e.changedTouches[0]
@@ -1162,6 +1259,7 @@
             }
             
             touchStartElement = null
+            velocityHistory = []
         }
         
         function swapLogos(logo1, logo2) {
