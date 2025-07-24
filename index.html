@@ -1511,13 +1511,7 @@
 
             let w = 0, l = 0, ow = 0, ol = 0, p = 0
             let firstGoalCount = 0, comebackCount = 0, totalGoals = 0
-            const opp   = isHome ? g.away_team_code : g.home_team_code
-            const venue = isHome ? 'vs' : '@'
-            const date  = new Date(g.date).toLocaleDateString()
-            const shots = isHome ? `${g.home_shots||'N/A'}-${g.away_shots||'N/A'}`
-                                 : `${g.away_shots||'N/A'}-${g.home_shots||'N/A'}`
-            
-
+    
             //DEBUG
             const mid = Math.floor(games.length/2);
             
@@ -1531,6 +1525,12 @@
                 const ot  = g.overtime === 'True' || g.shootout === 'True'
                 const pre = g.game_type === '1'
 
+                const opp   = isHome ? g.away_team_code : g.home_team_code
+                const venue = isHome ? 'vs' : '@'
+                const date  = new Date(g.date).toLocaleDateString()
+                const shots = isHome ? `${g.home_shots||'N/A'}-${g.away_shots||'N/A'}`
+                                     : `${g.away_shots||'N/A'}-${g.home_shots||'N/A'}`
+                
                 let col
                 if (pre) {
                     col = colors.preseason; p++
