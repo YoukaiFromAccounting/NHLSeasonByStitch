@@ -583,6 +583,17 @@
             createFloatingLogos()
         })
 
+        document.addEventListener('dragover', (e) => {
+            if (draggedElement) {
+                // Calculate velocity
+                mouseVelocityX = e.clientX - lastMouseX
+                mouseVelocityY = e.clientY - lastMouseY
+                lastMouseX = e.clientX
+                lastMouseY = e.clientY
+            }
+        })
+
+
         // Handle window resize to update carousel positioning
         window.addEventListener('resize', () => {
             // Recreate logos with new positioning for carousel
@@ -891,6 +902,11 @@
         }
         
         // Drag and drop functionality
+        let lastMouseX = 0
+        let lastMouseY = 0
+        let mouseVelocityX = 0
+        let mouseVelocityY = 0
+        let swayAnimationId = null
         let draggedElement = null
         let dragStartY = 0
         
@@ -913,15 +929,21 @@
             draggedElement = this
             this.classList.add('dragging')
             
-            // Store original position for smooth animation
+            // Initialize mouse tracking for sway
+            lastMouseX = e.clientX
+            lastMouseY = e.clientY
+            mouseVelocityX = 0
+            mouseVelocityY = 0
+            
             const rect = this.getBoundingClientRect()
             dragStartY = rect.top
             
-            // Set drag effect
             e.dataTransfer.effectAllowed = 'move'
             e.dataTransfer.setData('text/html', this.outerHTML)
             
-            // Add a slight delay to show the dragging state
+            // Start sway animation
+            startSwayAnimation()
+            
             setTimeout(() => {
                 if (draggedElement) {
                     draggedElement.style.opacity = '0.5'
@@ -962,10 +984,17 @@
         }
         
         function handleDragEnd(e) {
+            // Stop sway animation
+            if (swayAnimationId) {
+                cancelAnimationFrame(swayAnimationId)
+                swayAnimationId = null
+            }
+            
             // Clean up all dragging states
             document.querySelectorAll('.scarf-side-logo').forEach(logo => {
                 logo.classList.remove('dragging', 'drop-target')
                 logo.style.opacity = ''
+                logo.style.transform = logo.style.transform.replace(/rotate\([^)]*\)/, '') // Remove rotation but keep scale
             })
             
             draggedElement = null
@@ -975,10 +1004,47 @@
         let touchStartElement = null
         let touchY = 0
         
+        function startSwayAnimation() {
+            if (swayAnimationId) return
+            
+            function animate() {
+                if (!draggedElement) {
+                    swayAnimationId = null
+                    return
+                }
+                
+                // Calculate sway based on velocity (opposite direction for realistic physics)
+                const swayX = -mouseVelocityX * 0.3 // Multiply by factor to control intensity
+                const swayY = -mouseVelocityY * 0.2
+                
+                // Apply sway rotation (clamp to reasonable values)
+                const rotation = Math.max(-15, Math.min(15, swayX))
+                const currentTransform = draggedElement.style.transform || ''
+                const baseTransform = currentTransform.replace(/rotate\([^)]*\)/, '').trim()
+                
+                draggedElement.style.transform = `${baseTransform} rotate(${rotation}deg)`
+                
+                // Dampen velocity for realistic physics
+                mouseVelocityX *= 0.85
+                mouseVelocityY *= 0.85
+                
+                swayAnimationId = requestAnimationFrame(animate)
+            }
+            
+            animate()
+        }
+
         function handleTouchStart(e) {
             touchStartElement = this
             touchY = e.touches[0].clientY
             this.classList.add('dragging')
+            
+            // Initialize touch tracking for sway
+            lastMouseX = e.touches[0].clientX
+            lastMouseY = e.touches[0].clientY
+            mouseVelocityX = 0
+            mouseVelocityY = 0
+            startSwayAnimation()
         }
         
         function handleTouchMove(e) {
@@ -986,14 +1052,19 @@
             if (!touchStartElement) return
             
             const touch = e.touches[0]
+            
+            // Update velocity for sway
+            mouseVelocityX = touch.clientX - lastMouseX
+            mouseVelocityY = touch.clientY - lastMouseY
+            lastMouseX = touch.clientX
+            lastMouseY = touch.clientY
+            
             const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
             
-            // Remove previous drop targets
             document.querySelectorAll('.drop-target').forEach(el => {
                 el.classList.remove('drop-target')
             })
             
-            // Add drop target if over another logo
             if (elementBelow && elementBelow.classList.contains('scarf-side-logo') && 
                 elementBelow !== touchStartElement) {
                 elementBelow.classList.add('drop-target')
@@ -1003,15 +1074,20 @@
         function handleTouchEnd(e) {
             if (!touchStartElement) return
             
+            // Stop sway animation
+            if (swayAnimationId) {
+                cancelAnimationFrame(swayAnimationId)
+                swayAnimationId = null
+            }
+            
             const touch = e.changedTouches[0]
             const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
             
-            // Clean up classes
             document.querySelectorAll('.scarf-side-logo').forEach(logo => {
                 logo.classList.remove('dragging', 'drop-target')
+                logo.style.transform = logo.style.transform.replace(/rotate\([^)]*\)/, '')
             })
             
-            // Perform swap if dropped on another logo
             if (elementBelow && elementBelow.classList.contains('scarf-side-logo') && 
                 elementBelow !== touchStartElement) {
                 swapLogos(touchStartElement, elementBelow)
@@ -1261,17 +1337,24 @@
                 if (streakCount >= 3 && !pre) {
                     const streakIndicator = document.createElement('div')
                     streakIndicator.style.position = 'absolute'
-                    streakIndicator.style.right = '5px'
+                    streakIndicator.style.right = '2px'
                     streakIndicator.style.top = '50%'
                     streakIndicator.style.transform = 'translateY(-50%)'
                     streakIndicator.style.fontSize = '8px'
                     streakIndicator.style.fontWeight = 'bold'
                     streakIndicator.style.color = 'white'
                     streakIndicator.style.textShadow = '0 0 3px rgba(0,0,0,0.8)'
-                    streakIndicator.textContent = streakCount >= 5 ? `${streakCount}` : '●'
-                    s.appendChild(streakIndicator)
+                    streakIndicator.style.backgroundColor = 'rgba(0,0,0,0.6)'
+                    streakIndicator.style.padding = '1px 3px'
+                    streakIndicator.style.borderRadius = '3px'
+                    streakIndicator.style.minWidth = '12px'
+                    streakIndicator.style.textAlign = 'center'
+                    streakIndicator.style.zIndex = '10'
                     
-                    // Make stripe position relative for absolute positioning
+                    // Always show the number, never dots
+                    streakIndicator.textContent = streakCount.toString()
+                    
+                    s.appendChild(streakIndicator)
                     s.style.position = 'relative'
                 }
                 
@@ -1284,6 +1367,11 @@
                     const emojiSpan = document.createElement('span')
                     emojiSpan.className = 'scarf-emoji'
                     emojiSpan.textContent = emojiText
+                    emojiSpan.style.position = 'absolute'
+                    emojiSpan.style.right = '20px' // Move emojis left to make room for streak numbers
+                    emojiSpan.style.top = '50%'
+                    emojiSpan.style.transform = 'translateY(-50%)'
+                    emojiSpan.style.zIndex = '5'
                     s.appendChild(emojiSpan)
                 }
 
