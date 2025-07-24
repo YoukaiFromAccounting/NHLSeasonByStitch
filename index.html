@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>NHL Season Scarf Generator</title>
+    <title>NHL Season Scarf Generator2</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Ctext y='32' font-size='32'%3E%F0%9F%A7%A3%3C/text%3E%3C/svg%3E">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -165,7 +165,7 @@
             align-items: center;
             justify-content: center;
             opacity: 0.8;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease;
             cursor: grab;
             user-select: none;
             position: relative;
@@ -174,27 +174,38 @@
         
         .scarf-side-logo:hover {
             transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
         
         .scarf-side-logo.dragging {
             cursor: grabbing;
             transform: scale(1.1) rotate(5deg);
             z-index: 1000;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
             opacity: 0.9;
         }
         
         .scarf-side-logo.drop-target {
             transform: scale(1.15);
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
-            border: 3px solid #667eea;
+            filter: brightness(1.3) saturate(1.5);
         }
         
         .scarf-side-logo.swapping {
             transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
         
+        /* Custom floating drag logo */
+        .floating-drag-logo {
+            position: fixed;
+            width: 120px;
+            height: 120px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.8;
+            border-radius: 50%;
+            transition: transform 0.1s ease-out;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
         .scarf {
             border: 3px solid #34495e;
             border-radius: 12px;
@@ -451,6 +462,14 @@
         let teams = new Set()
         let seasons = new Set()
         let teamColoursData = []
+        let customDragElement = null
+        let dragOffsetX = 0
+        let dragOffsetY = 0
+        let lastMouseX = 0
+        let lastMouseY = 0
+        let mouseVelocityX = 0
+        let mouseVelocityY = 0
+        let swayAnimationId = null
 
         // NHL team logos (using local PNG logo files)
         const teamLogos = {
@@ -588,7 +607,12 @@
                 lastMouseY = e.clientY
             }
         })
-
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault()
+            if (customDragElement) {
+                updateCustomDragElement(e.clientX, e.clientY)
+            }
+        })
         document.addEventListener('DOMContentLoaded', () => {
             loadDataFromGitHub()
             loadTeamColours()
@@ -903,15 +927,6 @@
                 })
         }
         
-        // Drag and drop functionality
-        let lastMouseX = 0
-        let lastMouseY = 0
-        let mouseVelocityX = 0
-        let mouseVelocityY = 0
-        let swayAnimationId = null
-        let draggedElement = null
-        let dragStartY = 0
-        
         function setupDragEvents(logoDiv) {
             // Mouse events
             logoDiv.addEventListener('dragstart', handleDragStart)
@@ -931,28 +946,62 @@
             draggedElement = this
             this.classList.add('dragging')
             
-            // Initialize mouse tracking for sway
+            // Hide the default drag image
+            const emptyImg = new Image()
+            emptyImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
+            e.dataTransfer.setDragImage(emptyImg, 0, 0)
+            
+            // Create custom floating drag element
+            createCustomDragElement(this, e.clientX, e.clientY)
+            
+            // Initialize mouse tracking
             lastMouseX = e.clientX
             lastMouseY = e.clientY
             mouseVelocityX = 0
             mouseVelocityY = 0
-            
-            const rect = this.getBoundingClientRect()
-            dragStartY = rect.top
             
             e.dataTransfer.effectAllowed = 'move'
             e.dataTransfer.setData('text/html', this.outerHTML)
             
             // Start sway animation
             startSwayAnimation()
-            
-            setTimeout(() => {
-                if (draggedElement) {
-                    draggedElement.style.opacity = '0.5'
-                }
-            }, 0)
         }
-        
+        function createCustomDragElement(originalElement, mouseX, mouseY) {
+            // Remove any existing custom drag element
+            if (customDragElement) {
+                customDragElement.remove()
+            }
+            
+            customDragElement = document.createElement('div')
+            customDragElement.className = 'floating-drag-logo'
+            
+            // Copy the background image from the original
+            const img = originalElement.querySelector('img')
+            if (img && img.src) {
+                customDragElement.style.backgroundImage = `url(${img.src})`
+            }
+            
+            // Position at mouse
+            dragOffsetX = 60 // Half of the drag element width
+            dragOffsetY = 60 // Half of the drag element height
+            customDragElement.style.left = (mouseX - dragOffsetX) + 'px'
+            customDragElement.style.top = (mouseY - dragOffsetY) + 'px'
+            
+            document.body.appendChild(customDragElement)
+        }
+        function updateCustomDragElement(mouseX, mouseY) {
+            if (!customDragElement) return
+            
+            // Calculate velocity for sway
+            mouseVelocityX = mouseX - lastMouseX
+            mouseVelocityY = mouseY - lastMouseY
+            lastMouseX = mouseX
+            lastMouseY = mouseY
+            
+            // Update position
+            customDragElement.style.left = (mouseX - dragOffsetX) + 'px'
+            customDragElement.style.top = (mouseY - dragOffsetY) + 'px'
+        }
         function handleDragOver(e) {
             if (e.preventDefault) {
                 e.preventDefault()
@@ -962,13 +1011,16 @@
         }
         
         function handleDragEnter(e) {
-            if (this !== draggedElement) {
+            if (this !== draggedElement && draggedElement) {
                 this.classList.add('drop-target')
             }
         }
         
         function handleDragLeave(e) {
-            this.classList.remove('drop-target')
+            // Only remove if we're actually leaving this element
+            if (!this.contains(e.relatedTarget)) {
+                this.classList.remove('drop-target')
+            }
         }
         
         function handleDrop(e) {
@@ -992,11 +1044,17 @@
                 swayAnimationId = null
             }
             
+            // Remove custom drag element
+            if (customDragElement) {
+                customDragElement.remove()
+                customDragElement = null
+            }
+            
             // Clean up all dragging states
             document.querySelectorAll('.scarf-side-logo').forEach(logo => {
                 logo.classList.remove('dragging', 'drop-target')
                 logo.style.opacity = ''
-                logo.style.transform = logo.style.transform.replace(/rotate\([^)]*\)/, '') // Remove rotation but keep scale
+                logo.style.filter = ''
             })
             
             draggedElement = null
@@ -1010,25 +1068,24 @@
             if (swayAnimationId) return
             
             function animate() {
-                if (!draggedElement) {
+                if (!customDragElement) {
                     swayAnimationId = null
                     return
                 }
                 
                 // Calculate sway based on velocity (opposite direction for realistic physics)
-                const swayX = -mouseVelocityX * 0.3 // Multiply by factor to control intensity
+                const swayX = -mouseVelocityX * 0.4
                 const swayY = -mouseVelocityY * 0.2
                 
-                // Apply sway rotation (clamp to reasonable values)
-                const rotation = Math.max(-15, Math.min(15, swayX))
-                const currentTransform = draggedElement.style.transform || ''
-                const baseTransform = currentTransform.replace(/rotate\([^)]*\)/, '').trim()
+                // Apply sway rotation and slight tilt (clamp to reasonable values)
+                const rotation = Math.max(-20, Math.min(20, swayX))
+                const tilt = Math.max(-5, Math.min(5, swayY))
                 
-                draggedElement.style.transform = `${baseTransform} rotate(${rotation}deg)`
+                customDragElement.style.transform = `rotate(${rotation}deg) rotateX(${tilt}deg) scale(1.1)`
                 
                 // Dampen velocity for realistic physics
-                mouseVelocityX *= 0.85
-                mouseVelocityY *= 0.85
+                mouseVelocityX *= 0.88
+                mouseVelocityY *= 0.88
                 
                 swayAnimationId = requestAnimationFrame(animate)
             }
@@ -1038,12 +1095,16 @@
 
         function handleTouchStart(e) {
             touchStartElement = this
-            touchY = e.touches[0].clientY
             this.classList.add('dragging')
             
-            // Initialize touch tracking for sway
-            lastMouseX = e.touches[0].clientX
-            lastMouseY = e.touches[0].clientY
+            const touch = e.touches[0]
+            
+            // Create custom drag element for touch
+            createCustomDragElement(this, touch.clientX, touch.clientY)
+            
+            // Initialize touch tracking
+            lastMouseX = touch.clientX
+            lastMouseY = touch.clientY
             mouseVelocityX = 0
             mouseVelocityY = 0
             startSwayAnimation()
@@ -1051,16 +1112,14 @@
         
         function handleTouchMove(e) {
             e.preventDefault()
-            if (!touchStartElement) return
+            if (!touchStartElement || !customDragElement) return
             
             const touch = e.touches[0]
             
-            // Update velocity for sway
-            mouseVelocityX = touch.clientX - lastMouseX
-            mouseVelocityY = touch.clientY - lastMouseY
-            lastMouseX = touch.clientX
-            lastMouseY = touch.clientY
+            // Update custom drag element
+            updateCustomDragElement(touch.clientX, touch.clientY)
             
+            // Check for drop targets
             const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
             
             document.querySelectorAll('.drop-target').forEach(el => {
@@ -1072,6 +1131,7 @@
                 elementBelow.classList.add('drop-target')
             }
         }
+
         
         function handleTouchEnd(e) {
             if (!touchStartElement) return
@@ -1082,12 +1142,18 @@
                 swayAnimationId = null
             }
             
+            // Remove custom drag element
+            if (customDragElement) {
+                customDragElement.remove()
+                customDragElement = null
+            }
+            
             const touch = e.changedTouches[0]
             const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
             
             document.querySelectorAll('.scarf-side-logo').forEach(logo => {
                 logo.classList.remove('dragging', 'drop-target')
-                logo.style.transform = logo.style.transform.replace(/rotate\([^)]*\)/, '')
+                logo.style.filter = ''
             })
             
             if (elementBelow && elementBelow.classList.contains('scarf-side-logo') && 
@@ -1144,14 +1210,13 @@
         }
         
         function createSwapEffect(logo1, logo2) {
-            // Create particle effect for successful swap
             [logo1, logo2].forEach(logo => {
-                for (let i = 0; i < 6; i++) {
+                for (let i = 0; i < 8; i++) {
                     const particle = document.createElement('div')
                     particle.style.cssText = `
-                        position: absolute;
-                        width: 8px;
-                        height: 8px;
+                        position: fixed;
+                        width: 6px;
+                        height: 6px;
                         background: #667eea;
                         border-radius: 50%;
                         pointer-events: none;
@@ -1164,18 +1229,20 @@
                     
                     document.body.appendChild(particle)
                     
-                    // Animate particle
-                    const angle = (i / 6) * Math.PI * 2
-                    const distance = 50 + Math.random() * 30
+                    const angle = (i / 8) * Math.PI * 2
+                    const distance = 60 + Math.random() * 40
                     const endX = rect.left + rect.width/2 + Math.cos(angle) * distance
                     const endY = rect.top + rect.height/2 + Math.sin(angle) * distance
                     
                     particle.animate([
                         { transform: 'scale(0)', opacity: 1 },
-                        { transform: 'scale(1)', opacity: 1, offset: 0.3 },
-                        { transform: `scale(0) translate(${endX - rect.left - rect.width/2}px, ${endY - rect.top - rect.height/2}px)`, opacity: 0 }
+                        { transform: 'scale(1.5)', opacity: 1, offset: 0.4 },
+                        { 
+                            transform: `scale(0) translate(${endX - rect.left - rect.width/2}px, ${endY - rect.top - rect.height/2}px)`, 
+                            opacity: 0 
+                        }
                     ], {
-                        duration: 800,
+                        duration: 1000,
                         easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
                     }).onfinish = () => particle.remove()
                 }
