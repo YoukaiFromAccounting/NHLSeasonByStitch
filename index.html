@@ -598,25 +598,23 @@
             loadTeamColours()
             createFloatingLogos()
         })
-
-        document.addEventListener('dragover', (e) => {
-            if (draggedElement) {
-                // Calculate velocity
-                mouseVelocityX = e.clientX - lastMouseX
-                mouseVelocityY = e.clientY - lastMouseY
-                lastMouseX = e.clientX
-                lastMouseY = e.clientY
-            }
-        })
         document.addEventListener('dragover', (e) => {
             e.preventDefault()
             if (customDragElement) {
-                updateCustomDragElement(e.clientX, e.clientY)
+                const now = performance.now()
+                if (now - lastUpdateTime > 8) { // Update every 8ms for smoother tracking
+                    updateCustomDragElement(e.clientX, e.clientY)
+                    lastUpdateTime = now
+                }
             }
         })
         document.addEventListener('mousemove', (e) => {
             if (customDragElement && draggedElement) {
-                updateCustomDragElement(e.clientX, e.clientY)
+                const now = performance.now()
+                if (now - lastUpdateTime > 8) {
+                    updateCustomDragElement(e.clientX, e.clientY)
+                    lastUpdateTime = now
+                }
             }
         })
         document.addEventListener('DOMContentLoaded', () => {
@@ -957,22 +955,24 @@
             emptyImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
             e.dataTransfer.setDragImage(emptyImg, 0, 0)
             
-            // Create custom floating drag element - same size as original
+            // Create custom floating drag element
             createCustomDragElement(this, e.clientX, e.clientY)
             
-            // Initialize mouse tracking
+            // Initialize mouse tracking - start with zero velocity
             lastMouseX = e.clientX
             lastMouseY = e.clientY
             mouseVelocityX = 0
             mouseVelocityY = 0
-            velocityHistory = []
             
             e.dataTransfer.effectAllowed = 'move'
             e.dataTransfer.setData('text/html', this.outerHTML)
             
-            // Start enhanced sway animation
+            // Start sway animation
             startEnhancedSwayAnimation()
         }
+        // Enhanced mouse tracking - update more frequently for better responsiveness
+        let lastUpdateTime = 0
+        
         function createCustomDragElement(originalElement, mouseX, mouseY) {
             // Remove any existing custom drag element
             if (customDragElement) {
@@ -999,19 +999,14 @@
         function updateCustomDragElement(mouseX, mouseY) {
             if (!customDragElement) return
             
-            // Calculate velocity with higher sensitivity
-            const newVelocityX = (mouseX - lastMouseX) * 2 // Amplify velocity
-            const newVelocityY = (mouseY - lastMouseY) * 2
+            // Calculate instantaneous velocity (how fast mouse is moving right now)
+            const deltaTime = 16 // Assume ~60fps (16ms per frame)
+            const rawVelocityX = (mouseX - lastMouseX) / deltaTime
+            const rawVelocityY = (mouseY - lastMouseY) / deltaTime
             
-            // Keep velocity history for smoother motion
-            velocityHistory.push({ x: newVelocityX, y: newVelocityY })
-            if (velocityHistory.length > 5) {
-                velocityHistory.shift()
-            }
-            
-            // Average recent velocities for smoother sway
-            mouseVelocityX = velocityHistory.reduce((sum, v) => sum + v.x, 0) / velocityHistory.length
-            mouseVelocityY = velocityHistory.reduce((sum, v) => sum + v.y, 0) / velocityHistory.length
+            // Smooth the velocity slightly to avoid jitter, but keep it responsive
+            mouseVelocityX = mouseVelocityX * 0.3 + rawVelocityX * 0.7
+            mouseVelocityY = mouseVelocityY * 0.3 + rawVelocityY * 0.7
             
             lastMouseX = mouseX
             lastMouseY = mouseY
@@ -1023,46 +1018,30 @@
         function startEnhancedSwayAnimation() {
             if (swayAnimationId) return
             
-            let swayMomentumX = 0
-            let swayMomentumY = 0
-            
             function animate() {
                 if (!customDragElement) {
                     swayAnimationId = null
                     return
                 }
                 
-                // Enhanced sway calculation with momentum
-                const swayInfluence = 0.8 // How much velocity affects sway
-                const swayDamping = 0.92   // How quickly sway dampens
-                const maxSway = 35         // Maximum sway angle
+                // Calculate sway based ONLY on current mouse velocity (opposite direction for physics)
+                const swayInfluence = 1.2  // How dramatically it reacts to mouse movement
+                const maxSway = 30         // Maximum sway angle
                 
-                // Add current velocity to momentum
-                swayMomentumX += mouseVelocityX * swayInfluence
-                swayMomentumY += mouseVelocityY * swayInfluence
+                // Direct reaction to mouse velocity - if you move left, logo sways right
+                const swayRotation = Math.max(-maxSway, Math.min(maxSway, -mouseVelocityX * swayInfluence))
+                const swayTilt = Math.max(-10, Math.min(10, -mouseVelocityY * swayInfluence * 0.3))
                 
-                // Apply damping to momentum
-                swayMomentumX *= swayDamping
-                swayMomentumY *= swayDamping
-                
-                // Calculate sway angles (opposite direction for realistic physics)
-                const swayRotation = Math.max(-maxSway, Math.min(maxSway, -swayMomentumX))
-                const swayTilt = Math.max(-15, Math.min(15, -swayMomentumY * 0.5))
-                
-                // Add slight wobble for more life-like movement
-                const time = Date.now() * 0.003
-                const wobble = Math.sin(time) * 2
-                
-                // Apply enhanced transform with multiple effects
-                const scale = 1.05 + Math.abs(swayRotation) * 0.01 // Slight scale based on sway
+                // Apply transform - no wobble, just direct response to mouse movement
+                const scale = 1.05
                 customDragElement.style.transform = 
-                    `rotate(${swayRotation + wobble}deg) 
+                    `rotate(${swayRotation}deg) 
                      rotateX(${swayTilt}deg) 
                      scale(${scale})`
                 
-                // Dampen the base velocity more gradually
-                mouseVelocityX *= 0.85
-                mouseVelocityY *= 0.85
+                // Gradually reduce velocity so it settles when mouse stops moving
+                mouseVelocityX *= 0.90  // Dampen velocity
+                mouseVelocityY *= 0.90
                 
                 swayAnimationId = requestAnimationFrame(animate)
             }
@@ -1185,11 +1164,11 @@
             const touch = e.touches[0]
             createCustomDragElement(this, touch.clientX, touch.clientY)
             
+            // Initialize with zero velocity
             lastMouseX = touch.clientX
             lastMouseY = touch.clientY
             mouseVelocityX = 0
             mouseVelocityY = 0
-            velocityHistory = []
             startEnhancedSwayAnimation()
         }
         
