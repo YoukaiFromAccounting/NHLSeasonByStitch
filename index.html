@@ -863,7 +863,11 @@
                     
                     t.appendChild(o)
                 })
-            t.onchange = populateColourSelectors
+            t.onchange = () => {
+                populateColourSelectors()
+                // Hide side logos until scarf is generated
+                document.getElementById('scarfSideLogos').style.display = 'none'
+            }
         }
 
         function getAlternateLogos(code, maxAlts = 10) {
@@ -1366,9 +1370,6 @@
             const code = document.getElementById('teamSelect').value
             const name = codeToFullName[code]
             const choices = teamColoursData.filter(c => c.Team === name)
-
-            // Create side logos for selected team
-            createScarfSideLogos(code)
             
             // set defaults: first home, second away, third alternate
             const defaults = {
@@ -1473,6 +1474,9 @@
             // Get toggle states
             const showEmojis = document.getElementById('emojiToggle')?.checked ?? true
             const showStreaks = document.getElementById('streakToggle')?.checked ?? true
+
+            // Show team logos
+            createScarfSideLogos(team)
             
             if (!season) return alert('Please select a season first')
             if (!team)   return alert('Please select a team first')
