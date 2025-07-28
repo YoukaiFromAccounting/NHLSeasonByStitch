@@ -444,6 +444,9 @@
             <div class="legend-item">
                 <span>⚔️ Rivalry</span>
             </div>
+            <div class="legend-item">
+                <span>🏆 Playoffs</span>
+            </div>
         </div>
 
         <div class="scarf-container">
@@ -1528,6 +1531,7 @@
                 const won = ts > os
                 const ot  = g.overtime === 'True' || g.shootout === 'True'
                 const pre = g.game_type === '1'
+                const playoff = g.game_type === '3'
 
                 const opp   = isHome ? g.away_team_code : g.home_team_code
                 const venue = isHome ? 'vs' : '@'
@@ -1639,6 +1643,9 @@
                     if (areRivals(team, opp)) {
                         emojiText += '⚔️'
                     }
+                    if (playoff) {
+                        emojiText += '🏆'
+                    }
                     if (emojiText) {
                         const emojiSpan = document.createElement('span')
                         emojiSpan.className = 'scarf-emoji'
@@ -1722,10 +1729,6 @@
                 <div class="stat-card">
                     <div class="stat-value">${ow+ol}</div>
                     <div class="stat-label">OT/SO Games</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${reg}</div>
-                    <div class="stat-label">Regular Season Games</div>
                 </div>
             `
         }
