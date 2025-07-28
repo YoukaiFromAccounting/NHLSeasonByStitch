@@ -245,8 +245,13 @@
             z-index: 1;
         }
         .scarf-stripe.playoff {
-            border-top: 2px solid #ffd700;
-            border-bottom: 2px solid #ffd700;
+            background-image: repeating-linear-gradient(
+                90deg,
+                rgba(255,255,255,0.3) 0,
+                rgba(255,255,255,0.3) 2px,
+                rgba(0,0,0,0.1) 2px,
+                rgba(0,0,0,0.1) 4px
+            );
         }
         .scarf-stripe::after {
             content: '';
