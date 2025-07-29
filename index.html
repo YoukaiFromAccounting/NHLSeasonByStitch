@@ -1686,7 +1686,7 @@
                 scarf.appendChild(s)
             })
 
-            updateStats(w, l, ow, ol, p, games.length, firstGoalCount, comebackCount, totalGoals)
+            updateStats(w, l, ow, ol, p, games.length, firstGoalCount, comebackCount, totalGoals, team, season)
         }
 
         function updateStats(w, l, ow, ol, p, total, firstGoalCount, comebackCount, totalGoals) {
@@ -1699,6 +1699,19 @@
             const firstGoalPct = reg > 0 ? ((firstGoalCount / reg) * 100).toFixed(1) : 0
             const comebackPct = reg > 0 ? ((comebackCount / reg) * 100).toFixed(1) : 0
             const avgWaitTime = reg > 0 ? ((60 * reg) / Math.max(totalGoals, 1)).toFixed(1) : 0
+
+            const teamStats = {
+                totalWins: w + ow,
+                totalLosses: l + ol,  
+                points: pts,
+                winPct: parseFloat(pct),
+                firstGoalCount: firstGoalCount,
+                comebackCount: comebackCount,
+                avgWaitTime: parseFloat(avgWaitTime),
+                otGames: ow + ol,
+                otPct: ((ow + ol) / total * 100)
+            }
+            const rankings = calculateLeagueRankings(season, teamCode, teamStats)
             
             // League average estimates (based on historical NHL data)
             const leagueFirstGoalAvg = 50.0 // Teams score first ~50% of the time against any opponent
@@ -1708,43 +1721,158 @@
                 <div class="stat-card">
                     <div class="stat-value">${w+ow}</div>
                     <div class="stat-label">Total Wins</div>
+                    <div class="stat-sublabel">${rankings.totalWins.rank}${rankings.totalWins.suffix} of ${rankings.totalWins.total} teams</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${l+ol}</div>
                     <div class="stat-label">Total Losses</div>
+                    <div class="stat-sublabel">${rankings.totalLosses.rank}${rankings.totalLosses.suffix} fewest of ${rankings.totalLosses.total} teams</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${pts}</div>
                     <div class="stat-label">Points</div>
+                    <div class="stat-sublabel">${rankings.points.rank}${rankings.points.suffix} of ${rankings.points.total} teams</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${pct}%</div>
                     <div class="stat-label">Win Percentage</div>
+                    <div class="stat-sublabel">${rankings.winPct.rank}${rankings.winPct.suffix} of ${rankings.winPct.total} teams</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${firstGoalCount}</div>
                     <div class="stat-label">Scored First</div>
-                    <div class="stat-sublabel">${firstGoalPct}% vs ${leagueFirstGoalAvg}% avg</div>
+                    <div class="stat-sublabel">${rankings.firstGoalCount.rank}${rankings.firstGoalCount.suffix} of ${rankings.firstGoalCount.total} teams</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${comebackCount}</div>
                     <div class="stat-label">Comebacks</div>
-                    <div class="stat-sublabel">${comebackPct}% vs ${leagueComebackAvg}% avg</div>
+                    <div class="stat-sublabel">${rankings.comebackCount.rank}${rankings.comebackCount.suffix} of ${rankings.comebackCount.total} teams</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${avgWaitTime}</div>
                     <div class="stat-label">Avg Wait Per Goal (min)</div>
-                    <div class="stat-sublabel">Based on ${totalGoals} goals scored</div>
+                    <div class="stat-sublabel">${rankings.avgWaitTime.rank}${rankings.avgWaitTime.suffix} lowest of ${rankings.avgWaitTime.total} teams</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${ow+ol}</div>
                     <div class="stat-label">OT/SO Games</div>
+                    <div class="stat-sublabel">${rankings.otGames.rank}${rankings.otGames.suffix} of ${rankings.otGames.total} teams</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${((ow+ol)/total * 100).toFixed(1)}%</div>
                     <div class="stat-label">Chance of OT/SO</div>
+                    <div class="stat-sublabel">${rankings.otPct.rank}${rankings.otPct.suffix} of ${rankings.otPct.total} teams</div>
                 </div>
             `
+        }
+        function calculateLeagueRankings(season, teamCode, teamStats) {
+            // Calculate stats for all teams in the season
+            const allTeamStats = new Map()
+            
+            // Get all teams in this season
+            const seasonGames = gameData.filter(g => g.season === season)
+            const teamsInSeason = new Set()
+            seasonGames.forEach(g => {
+                if (g.home_team_code) teamsInSeason.add(g.home_team_code)
+                if (g.away_team_code) teamsInSeason.add(g.away_team_code)
+            })
+            
+            // Calculate stats for each team
+            teamsInSeason.forEach(team => {
+                const games = seasonGames.filter(g => 
+                    g.home_team_code === team || g.away_team_code === team
+                ).sort((a,b) => new Date(a.date) - new Date(b.date))
+                
+                let w = 0, l = 0, ow = 0, ol = 0, p = 0
+                let firstGoalCount = 0, comebackCount = 0, totalGoals = 0
+                
+                games.forEach(g => {
+                    const isHome = g.home_team_code === team
+                    const ts = +(isHome ? g.home_score : g.away_score)
+                    const os = +(isHome ? g.away_score : g.home_score)
+                    const won = ts > os
+                    const ot = g.overtime === 'True' || g.shootout === 'True'
+                    const pre = g.game_type === '1'
+                    
+                    if (pre) {
+                        p++
+                    } else if (won) {
+                        if (ot) ow++; else w++
+                    } else {
+                        if (ot) ol++; else l++
+                    }
+                    
+                    // First goal and comeback stats
+                    const scoredFirst = (isHome && g.first_goal === 'home') || (!isHome && g.first_goal === 'away')
+                    const hadComeback = (isHome && g.home_comeback === 'True') || (!isHome && g.away_comeback === 'True')
+                    
+                    if (scoredFirst) firstGoalCount++
+                    if (hadComeback) comebackCount++
+                    if (!pre) totalGoals += ts
+                })
+                
+                const totalGames = games.length
+                const regGames = totalGames - p
+                const points = w*2 + ow*2 + ol*1
+                const winPct = regGames > 0 ? ((w + ow)/regGames * 100) : 0
+                const firstGoalPct = regGames > 0 ? (firstGoalCount / regGames * 100) : 0
+                const comebackPct = regGames > 0 ? (comebackCount / regGames * 100) : 0
+                const avgWaitTime = regGames > 0 ? ((60 * regGames) / Math.max(totalGoals, 1)) : 0
+                const otPct = totalGames > 0 ? ((ow + ol) / totalGames * 100) : 0
+                
+                allTeamStats.set(team, {
+                    totalWins: w + ow,
+                    totalLosses: l + ol,
+                    points: points,
+                    winPct: winPct,
+                    firstGoalCount: firstGoalCount,
+                    comebackCount: comebackCount,
+                    avgWaitTime: avgWaitTime,
+                    otGames: ow + ol,
+                    otPct: otPct
+                })
+            })
+            
+            // Calculate rankings
+            const rankings = {}
+            const statKeys = ['totalWins', 'totalLosses', 'points', 'winPct', 'firstGoalCount', 'comebackCount', 'avgWaitTime', 'otGames', 'otPct']
+            
+            statKeys.forEach(stat => {
+                const sorted = Array.from(allTeamStats.entries())
+                    .sort((a, b) => {
+                        // For avgWaitTime, lower is better (reverse sort)
+                        if (stat === 'avgWaitTime') {
+                            return a[1][stat] - b[1][stat]
+                        }
+                        // For totalLosses, lower is better (reverse sort)  
+                        if (stat === 'totalLosses') {
+                            return a[1][stat] - b[1][stat]
+                        }
+                        // For everything else, higher is better
+                        return b[1][stat] - a[1][stat]
+                    })
+                
+                const teamRank = sorted.findIndex(([team]) => team === teamCode) + 1
+                const totalTeams = sorted.length
+                
+                rankings[stat] = {
+                    rank: teamRank,
+                    total: totalTeams,
+                    suffix: getRankSuffix(teamRank)
+                }
+            })
+            
+            return rankings
+        }
+        
+        function getRankSuffix(rank) {
+            if (rank % 100 >= 11 && rank % 100 <= 13) return 'th'
+            switch (rank % 10) {
+                case 1: return 'st'
+                case 2: return 'nd' 
+                case 3: return 'rd'
+                default: return 'th'
+            }
         }
         // Add double-tap to shuffle all logos
         function shuffleLogos() {
