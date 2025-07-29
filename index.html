@@ -1689,7 +1689,7 @@
             updateStats(w, l, ow, ol, p, games.length, firstGoalCount, comebackCount, totalGoals, team, season)
         }
 
-        function updateStats(w, l, ow, ol, p, total, firstGoalCount, comebackCount, totalGoals) {
+        function updateStats(w, l, ow, ol, p, total, firstGoalCount, comebackCount, totalGoals, teamCode, season) {
             const out = document.getElementById('stats')
             const reg = total - p
             const pts = w*2 + ow*2 + ol*1
