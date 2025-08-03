@@ -1490,8 +1490,10 @@
             // Show team logos
             createScarfSideLogos(team)
             
-            if (!season) return alert('Please select a season first')
-            if (!team)   return alert('Please select a team first')
+            if (!team || !season) {
+                alert('Please select both a season and a team first.')
+                return
+            }
             if (!gameData.length) return alert('Data still loading, wait a moment')
             
             // Start background transition to team's primary color
