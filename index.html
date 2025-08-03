@@ -1382,6 +1382,8 @@
             const code = document.getElementById('teamSelect').value
             const name = codeToFullName[code]
             const choices = teamColoursData.filter(c => c.Team === name)
+
+            // o.title = `${c['Color Name']} (${c['Hex Code']})`
             
             // set defaults: first home, second away, third alternate
             const defaults = {
