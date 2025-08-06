@@ -422,23 +422,23 @@
 
         <div class="legend">
             <div class="legend-item">
-                <div class="legend-color" style="background: #2ecc71"></div>
+                <div class="legend-color" id="legend-win-color" style="background: #2ecc71"></div>
                 <span>Win</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: #e74c3c"></div>
+                <div class="legend-color" id="legend-loss-color" style="background: #e74c3c"></div>
                 <span>Loss</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: #f39c12"></div>
+                <div class="legend-color" id="legend-otwin-color" style="background: #f39c12"></div>
                 <span>OT / SO Win</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: #95a5a6"></div>
+                <div class="legend-color" id="legend-otloss-color" style="background: #95a5a6"></div>
                 <span>OT / SO Loss</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: #9b59b6"></div>
+                <div class="legend-color" id="legend-preseason-color" style="background: #9b59b6"></div>
                 <span>Preseason</span>
             </div>
             <div class="legend-item">
@@ -788,8 +788,14 @@
             } : {r: 0, g: 0, b: 0}
         }
 
-
-
+        function updateLegendColors() {
+            document.getElementById('legend-win-color').style.backgroundColor = colors.win || '#2ecc71'
+            document.getElementById('legend-loss-color').style.backgroundColor = colors.loss || '#e74c3c'
+            document.getElementById('legend-otwin-color').style.backgroundColor = colors.otWin || '#f39c12'
+            document.getElementById('legend-otloss-color').style.backgroundColor = colors.otLoss || '#95a5a6'
+            document.getElementById('legend-preseason-color').style.backgroundColor = colors.preseason || '#9b59b6'
+        }
+    
         function loadTeamColours() {
             fetch('nhl_team_colors.csv')
                 .then(r => r.ok ? r.text() : Promise.reject('Could not load team colours'))
