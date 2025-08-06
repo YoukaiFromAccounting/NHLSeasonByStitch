@@ -1487,6 +1487,9 @@
             colors.otLoss    = document.getElementById('otLossColorSelect').value
             colors.preseason = document.getElementById('preseasonColorSelect').value
 
+            // Update the legend colours
+            updateLegendColors()
+            
             const team = document.getElementById('teamSelect').value
             const season = document.getElementById('seasonSelect').value
             const width = document.getElementById('scarfWidth').value
