@@ -872,7 +872,17 @@
                     if (g.home_team_code) teams.add(g.home_team_code)
                     if (g.away_team_code) teams.add(g.away_team_code)
                 })
-            Array.from(teams).sort()
+            
+            // Filter out teams with fewer than 10 games
+            const validTeams = Array.from(teams).filter(teamCode => {
+                const teamGames = gameData.filter(g => 
+                    g.season === season && 
+                    (g.home_team_code === teamCode || g.away_team_code === teamCode)
+                )
+                return teamGames.length >= 10
+            })
+            
+            validTeams.sort()
                 .forEach(code => {
                     const o = document.createElement('option')
                     o.value = code
