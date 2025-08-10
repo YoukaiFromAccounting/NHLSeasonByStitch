@@ -656,7 +656,12 @@
 
         function createFloatingLogos() {
             const container = document.getElementById('backgroundLogos')
-            const teamCodes = Object.keys(teamLogos)
+            // Retrieve only active teams
+            const activeTeams = Object.keys(teamLogos).filter(code => 
+                code !== 'ATL' && code !== 'ARI'
+            )
+            
+            const teamCodes = activeTeams
               .sort((a, b) => {
                 // look up the full names and compare them
                 const nameA = codeToFullName[a]
