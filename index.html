@@ -912,11 +912,12 @@
             checks.push(
               fetch(url, { method: 'HEAD' })
                 .then(res => res.ok ? url : null)
-                .catch(() => null)
+                .catch(() => null) // Silently catch network errors
             )
           }
           return Promise.all(checks)
             .then(results => results.filter(r => r))
+            .catch(() => []) // Return empty array if all fail
         }
         
         function createScarfSideLogos(teamCode) {
@@ -946,7 +947,7 @@
                         img.style.width = '100%'
                         img.style.height = '100%'
                         img.style.objectFit = 'contain'
-                        img.style.pointerEvents = 'none' // Prevent img from interfering with drag
+                        img.style.pointerEvents = 'none'
                         
                         img.onerror = function() {
                             this.style.display = 'none'
@@ -957,9 +958,9 @@
                             fallback.style.alignItems = 'center'
                             fallback.style.justifyContent = 'center'
                             fallback.style.pointerEvents = 'none'
-                            this.parentNode.appendChild(fallback)
+                            parentNode.appendChild(fallback)
                         }
-                        
+                                            
                         logoDiv.appendChild(img)
                         
                         // Add drag event listeners
