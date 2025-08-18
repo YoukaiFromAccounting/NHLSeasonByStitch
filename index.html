@@ -527,47 +527,7 @@
             WPG: 'team_logos/WPG.png',
             WSH: 'team_logos/WSH.png'
         }
-
-        // Team alternate logos (for side display)
-        const teamAlternateLogos = {
-            ANA: ['team_logos/ANA_Alt1.png', 'team_logos/ANA_Alt2.png'],
-            ARI: ['team_logos/ARI_Alt1.png', 'team_logos/ARI_Alt2.png'],
-            BOS: ['team_logos/BOS_Alt1.png', 'team_logos/BOS_Alt2.png'],
-            BUF: ['team_logos/BUF_Alt1.png', 'team_logos/BUF_Alt2.png'],
-            CGY: ['team_logos/CGY_Alt1.png'],
-            CAR: ['team_logos/CAR_Alt1.png', 'team_logos/CAR_Alt2.png'],
-            CBJ: ['team_logos/CBJ_Alt1.png', 'team_logos/CBJ_Alt2.png'],
-            CHI: [],
-            COL: ['team_logos/COL_Alt1.png', 'team_logos/COL_Alt2.png'],
-            DAL: ['team_logos/DAL_Alt1.png', 'team_logos/DAL_Alt2.png'],
-            DET: [],
-            EDM: [],
-            FLA: ['team_logos/FLA_Alt1.png', 'team_logos/FLA_Alt2.png', 'team_logos/FLA_Alt3.png', 'team_logos/FLA_Second.png'],
-            LAK: ['team_logos/LAK_Alt1.png', 'team_logos/LAK_Alt2.png', 'team_logos/LAK_Alt3.png'],
-            MIN: ['team_logos/MIN_Alt1.png', 'team_logos/MIN_Alt2.png', 'team_logos/MIN_Alt3.png', 'team_logos/MIN_Ann.png'],
-            MTL: [],
-            NSH: ['team_logos/NSH_Alt1.png', 'team_logos/NSH_Alt2.png', 'team_logos/NSH_Alt3.png', 'team_logos/NSH_Alt4.png'],
-            NJD: ['team_logos/NJD_Alt1.png'],
-            NYI: ['team_logos/NYI_Alt1.png', 'team_logos/NYI_Alt2.png', 'team_logos/NYI_Alt3.png'],
-            NYR: ['team_logos/NYR_Alt1.png', 'team_logos/NYR_Alt2.png', 'team_logos/NYR_Alt3.png', 'team_logos/NYR_Alt4.png'],
-            OTT: ['team_logos/OTT_Alt1.png', 'team_logos/OTT_Alt2.png'],
-            PHI: ['team_logos/PHI_Alt1.png'],
-            PHX: ['team_logos/ARI_Alt1.png', 'team_logos/ARI_Alt2.png'],
-            PIT: ['team_logos/PIT_Alt1.png', 'team_logos/PIT_Alt2.png'],
-            SJS: ['team_logos/SJS_Alt1.png', 'team_logos/SJS_Alt2.png', 'team_logos/SJS_Alt3.png', 'team_logos/SJS_Alt4.png', 'team_logos/SJS_Alt5.png', 'team_logos/SJS_Ann.png'],
-            SEA: ['team_logos/SEA_Alt1.png', 'team_logos/SEA_Alt2.png'],
-            STL: ['team_logos/STL_Alt1.png'],
-            TBL: ['team_logos/TBL_Alt1.png', 'team_logos/TBL_Alt2.png', 'team_logos/TBL_Alt3.png', 'team_logos/TBL_Alt4.png'],
-            TOR: ['team_logos/TOR_Alt1.png', 'team_logos/TOR_Alt2.png', 'team_logos/TOR_Alt3.png', 'team_logos/TOR_Alt4.png'],
-            UTA: [],
-            VAN: ['team_logos/VAN_Alt1.png', 'team_logos/VAN_Alt2.png'],
-            VGK: ['team_logos/VGK_Alt1.png'],
-            WPG: ['team_logos/WPG_Alt1.png', 'team_logos/WPG_Alt2.png', 'team_logos/WPG_Alt3.png', 'team_logos/WPG_Alt4.png', 'team_logos/WPG_Alt5.png'],
-            WSH: ['team_logos/WSH_Alt1.png', 'team_logos/WSH_Alt2.png', 'team_logos/WSH_Alt3.png', 'team_logos/WSH_Alt4.png']
-        }
-
-
-
+        
         // map each code to its exact Team name in colours CSV
         const codeToFullName = {
             ANA: 'Anaheim Ducks',
@@ -1196,35 +1156,6 @@
         // Touch events for mobile support
         let touchStartElement = null
         let touchY = 0
-        
-        function startSwayAnimation() {
-            if (swayAnimationId) return
-            
-            function animate() {
-                if (!customDragElement) {
-                    swayAnimationId = null
-                    return
-                }
-                
-                // Calculate sway based on velocity (opposite direction for realistic physics)
-                const swayX = -mouseVelocityX * 0.4
-                const swayY = -mouseVelocityY * 0.2
-                
-                // Apply sway rotation and slight tilt (clamp to reasonable values)
-                const rotation = Math.max(-20, Math.min(20, swayX))
-                const tilt = Math.max(-5, Math.min(5, swayY))
-                
-                customDragElement.style.transform = `rotate(${rotation}deg) rotateX(${tilt}deg) scale(1.1)`
-                
-                // Dampen velocity for realistic physics
-                mouseVelocityX *= 0.88
-                mouseVelocityY *= 0.88
-                
-                swayAnimationId = requestAnimationFrame(animate)
-            }
-            
-            animate()
-        }
 
         function handleTouchStart(e) {
             touchStartElement = this
@@ -1907,25 +1838,6 @@
                 case 3: return 'rd'
                 default: return 'th'
             }
-        }
-        // Add double-tap to shuffle all logos
-        function shuffleLogos() {
-            const container = document.getElementById('scarfSideLogos')
-            const logos = Array.from(container.children)
-            
-            // Fisher-Yates shuffle
-            for (let i = logos.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1))
-                container.appendChild(logos[j])
-            }
-            
-            // Add shuffle effect
-            logos.forEach((logo, index) => {
-                logo.style.transform = `scale(0.8) rotate(${Math.random() * 720 - 360}deg)`
-                setTimeout(() => {
-                    logo.style.transform = ''
-                }, 300 + index * 50)
-            })
         }
         
         function showTooltip(e) {
