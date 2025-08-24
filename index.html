@@ -189,6 +189,68 @@
         .scarf-side-logo.swapping {
             transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
+
+        .scarf-with-graph {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .win-loss-graph {
+            width: 120px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #34495e;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .graph-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #34495e;
+            text-align: center;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        
+        .graph-svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .graph-line {
+            fill: none;
+            stroke: #667eea;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+        
+        .graph-area-positive {
+            fill: rgba(46, 204, 113, 0.2);
+        }
+        
+        .graph-area-negative {
+            fill: rgba(231, 76, 60, 0.2);
+        }
+        
+        .graph-axis {
+            stroke: #95a5a6;
+            stroke-width: 1;
+        }
+        
+        .graph-axis-label {
+            font-size: 8px;
+            fill: #7f8c8d;
+            text-anchor: middle;
+        }
+        
+        .graph-grid {
+            stroke: #ecf0f1;
+            stroke-width: 0.5;
+            stroke-dasharray: 2,2;
+        }
         
         /* Custom floating drag logo */
         .floating-drag-logo {
@@ -1647,10 +1709,171 @@
                 s.addEventListener('mousemove', updateTooltipPosition)
                 scarf.appendChild(s)
             })
-
+            createWinLossGraph(games, team, scarf)
             updateStats(w, l, ow, ol, p, games.length, firstGoalCount, comebackCount, totalGoals, team, season)
         }
 
+        function createWinLossGraph(games, teamCode, scarfElement) {
+            const graphContainer = document.getElementById('winLossGraph')
+            const svg = document.getElementById('graphSvg')
+            
+            // Filter out preseason games for the graph
+            const regularSeasonGames = games.filter(g => g.game_type !== '1')
+            
+            if (regularSeasonGames.length === 0) {
+                graphContainer.style.display = 'none'
+                return
+            }
+            
+            // Calculate running wins/losses above .500
+            let wins = 0
+            let losses = 0
+            const dataPoints = []
+            
+            regularSeasonGames.forEach((game, index) => {
+                const isHome = game.home_team_code === teamCode
+                const teamScore = +(isHome ? game.home_score : game.away_score)
+                const oppScore = +(isHome ? game.away_score : game.home_score)
+                const won = teamScore > oppScore
+                
+                if (won) wins++
+                else losses++
+                
+                // Calculate games above/below .500
+                const totalGames = wins + losses
+                const expected500Wins = totalGames / 2
+                const aboveBelow500 = wins - expected500Wins
+                
+                dataPoints.push({
+                    gameNumber: index + 1,
+                    value: aboveBelow500,
+                    wins: wins,
+                    losses: losses
+                })
+            })
+            
+            // Set up SVG dimensions to match scarf height
+            const scarfHeight = scarfElement.offsetHeight
+            const svgWidth = 100
+            const svgHeight = scarfHeight - 40 // Account for title and padding
+            
+            svg.setAttribute('width', svgWidth)
+            svg.setAttribute('height', svgHeight)
+            svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`)
+            
+            // Clear existing content
+            svg.innerHTML = ''
+            
+            // Calculate scales
+            const maxGames = dataPoints.length
+            const maxAbsValue = Math.max(...dataPoints.map(d => Math.abs(d.value)), 5) // Minimum scale of 5
+            const xScale = (svgWidth - 20) / Math.max(maxGames - 1, 1) // Leave margin for axis
+            const yScale = (svgHeight - 20) / (maxAbsValue * 2) // Leave margin top/bottom
+            const centerY = svgHeight / 2
+            
+            // Create grid lines
+            for (let i = -maxAbsValue; i <= maxAbsValue; i += Math.max(1, Math.floor(maxAbsValue / 3))) {
+                if (i === 0) continue // Skip zero line, we'll draw it separately
+                const y = centerY - (i * yScale)
+                const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+                gridLine.setAttribute('x1', 10)
+                gridLine.setAttribute('y1', y)
+                gridLine.setAttribute('x2', svgWidth - 10)
+                gridLine.setAttribute('y2', y)
+                gridLine.classList.add('graph-grid')
+                svg.appendChild(gridLine)
+            }
+            
+            // Draw zero line (more prominent)
+            const zeroLine = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+            zeroLine.setAttribute('x1', 10)
+            zeroLine.setAttribute('y1', centerY)
+            zeroLine.setAttribute('x2', svgWidth - 10)
+            zeroLine.setAttribute('y2', centerY)
+            zeroLine.classList.add('graph-axis')
+            svg.appendChild(zeroLine)
+            
+            // Create area fills (positive and negative)
+            if (dataPoints.length > 1) {
+                // Positive area
+                let positivePath = `M 10 ${centerY}`
+                let negativePath = `M 10 ${centerY}`
+                
+                dataPoints.forEach((point, index) => {
+                    const x = 10 + (index * xScale)
+                    const y = centerY - (point.value * yScale)
+                    
+                    if (point.value >= 0) {
+                        positivePath += ` L ${x} ${y}`
+                    } else {
+                        negativePath += ` L ${x} ${y}`
+                    }
+                })
+                
+                positivePath += ` L ${10 + ((dataPoints.length - 1) * xScale)} ${centerY} Z`
+                negativePath += ` L ${10 + ((dataPoints.length - 1) * xScale)} ${centerY} Z`
+                
+                const positiveArea = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+                positiveArea.setAttribute('d', positivePath)
+                positiveArea.classList.add('graph-area-positive')
+                svg.appendChild(positiveArea)
+                
+                const negativeArea = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+                negativeArea.setAttribute('d', negativePath)
+                negativeArea.classList.add('graph-area-negative')
+                svg.appendChild(negativeArea)
+            }
+            
+            // Create main line path
+            let pathData = ''
+            dataPoints.forEach((point, index) => {
+                const x = 10 + (index * xScale)
+                const y = centerY - (point.value * yScale)
+                pathData += index === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`
+            })
+            
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+            line.setAttribute('d', pathData)
+            line.classList.add('graph-line')
+            svg.appendChild(line)
+            
+            // Add axis labels
+            const topLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+            topLabel.setAttribute('x', svgWidth - 5)
+            topLabel.setAttribute('y', 15)
+            topLabel.classList.add('graph-axis-label')
+            topLabel.textContent = `+${Math.ceil(maxAbsValue)}`
+            svg.appendChild(topLabel)
+            
+            const bottomLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+            bottomLabel.setAttribute('x', svgWidth - 5)
+            bottomLabel.setAttribute('y', svgHeight - 5)
+            bottomLabel.classList.add('graph-axis-label')
+            bottomLabel.textContent = `-${Math.ceil(maxAbsValue)}`
+            svg.appendChild(bottomLabel)
+            
+            const zeroLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+            zeroLabel.setAttribute('x', svgWidth - 5)
+            zeroLabel.setAttribute('y', centerY + 3)
+            zeroLabel.classList.add('graph-axis-label')
+            zeroLabel.textContent = '0'
+            svg.appendChild(zeroLabel)
+            
+            // Show the graph
+            graphContainer.style.display = 'block'
+            
+            // Set the height to match the scarf
+            setTimeout(() => {
+                const actualScarfHeight = scarfElement.offsetHeight
+                if (actualScarfHeight > 0) {
+                    svg.setAttribute('height', actualScarfHeight - 40)
+                    svg.setAttribute('viewBox', `0 0 ${svgWidth} ${actualScarfHeight - 40}`)
+                    // Redraw with new dimensions
+                    createWinLossGraph(games, teamCode, scarfElement)
+                }
+            }, 100)
+        }
+        
         function updateStats(w, l, ow, ol, p, total, firstGoalCount, comebackCount, totalGoals, teamCode, season) {
             const out = document.getElementById('stats')
             const reg = total - p
