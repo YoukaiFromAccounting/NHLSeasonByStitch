@@ -1847,7 +1847,7 @@
                 svg.appendChild(positiveArea)
                 
                 const negativeArea = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-                negativePath.setAttribute('d', negativePath)
+                negativeArea.setAttribute('d', negativePath)  // Fixed this line
                 negativeArea.classList.add('graph-area-negative')
                 svg.appendChild(negativeArea)
             }
