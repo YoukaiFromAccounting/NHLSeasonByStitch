@@ -1780,8 +1780,11 @@
                 })
             })
             
-            // Get scarf height and match it exactly
+            // Get scarf height and calculate wordmark offset
             const scarfHeight = scarfElement ? scarfElement.offsetHeight : 400
+            const wordmarkElement = scarfElement ? scarfElement.querySelector('.scarf-wordmark') : null
+            const wordmarkHeight = wordmarkElement ? wordmarkElement.offsetHeight : 0
+            
             const svgWidth = 100
             const svgHeight = scarfHeight
             
@@ -1794,7 +1797,10 @@
             
             // Calculate scales - Y axis is time (matches scarf rows), X axis is above/below .500
             const maxAbsValue = Math.max(...dataPoints.map(d => Math.abs(d.value)), 5)
-            const yScale = svgHeight / Math.max(dataPoints.length - 1, 1) // Each game gets equal vertical space
+            const graphStartY = wordmarkHeight + 10 // Start after wordmark plus padding
+            const graphEndY = svgHeight - 10
+            const graphHeight = graphEndY - graphStartY
+            const yScale = graphHeight / Math.max(dataPoints.length - 1, 1) // Each game gets equal vertical space
             const centerX = svgWidth / 2
             const xScale = (svgWidth - 20) / (maxAbsValue * 2) // Scale for left/right movement
             
@@ -1805,9 +1811,9 @@
                 if (x >= 10 && x <= svgWidth - 10) {
                     const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line')
                     gridLine.setAttribute('x1', x)
-                    gridLine.setAttribute('y1', 10)
+                    gridLine.setAttribute('y1', graphStartY)
                     gridLine.setAttribute('x2', x)
-                    gridLine.setAttribute('y2', svgHeight - 10)
+                    gridLine.setAttribute('y2', graphEndY)
                     gridLine.classList.add('graph-grid')
                     svg.appendChild(gridLine)
                 }
@@ -1816,19 +1822,19 @@
             // Draw center line (.500 line)
             const centerLine = document.createElementNS('http://www.w3.org/2000/svg', 'line')
             centerLine.setAttribute('x1', centerX)
-            centerLine.setAttribute('y1', 10)
+            centerLine.setAttribute('y1', graphStartY)
             centerLine.setAttribute('x2', centerX)
-            centerLine.setAttribute('y2', svgHeight - 10)
+            centerLine.setAttribute('y2', graphEndY)
             centerLine.classList.add('graph-axis')
             svg.appendChild(centerLine)
             
             // Create area fills (positive and negative)
             if (dataPoints.length > 1) {
-                let positivePath = `M ${centerX} 10`
-                let negativePath = `M ${centerX} 10`
+                let positivePath = `M ${centerX} ${graphStartY}`
+                let negativePath = `M ${centerX} ${graphStartY}`
                 
                 dataPoints.forEach((point, index) => {
-                    const y = 10 + (index * yScale)
+                    const y = graphStartY + (index * yScale)
                     const x = centerX + (point.value * xScale)
                     
                     if (point.value >= 0) {
@@ -1838,8 +1844,8 @@
                     }
                 })
                 
-                positivePath += ` L ${centerX} ${svgHeight - 10} Z`
-                negativePath += ` L ${centerX} ${svgHeight - 10} Z`
+                positivePath += ` L ${centerX} ${graphEndY} Z`
+                negativePath += ` L ${centerX} ${graphEndY} Z`
                 
                 const positiveArea = document.createElementNS('http://www.w3.org/2000/svg', 'path')
                 positiveArea.setAttribute('d', positivePath)
@@ -1847,7 +1853,7 @@
                 svg.appendChild(positiveArea)
                 
                 const negativeArea = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-                negativeArea.setAttribute('d', negativePath)  // Fixed this line
+                negativeArea.setAttribute('d', negativePath)
                 negativeArea.classList.add('graph-area-negative')
                 svg.appendChild(negativeArea)
             }
@@ -1855,7 +1861,7 @@
             // Create main line path (vertical timeline)
             let pathData = ''
             dataPoints.forEach((point, index) => {
-                const y = 10 + (index * yScale)
+                const y = graphStartY + (index * yScale)
                 const x = centerX + (point.value * xScale)
                 pathData += index === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`
             })
@@ -1868,21 +1874,21 @@
             // Add axis labels
             const leftLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text')
             leftLabel.setAttribute('x', 5)
-            leftLabel.setAttribute('y', svgHeight / 2)
+            leftLabel.setAttribute('y', graphStartY + (graphHeight / 2))
             leftLabel.classList.add('graph-axis-label')
             leftLabel.textContent = `-${Math.ceil(maxAbsValue)}`
             svg.appendChild(leftLabel)
             
             const rightLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text')
             rightLabel.setAttribute('x', svgWidth - 5)
-            rightLabel.setAttribute('y', svgHeight / 2)
+            rightLabel.setAttribute('y', graphStartY + (graphHeight / 2))
             rightLabel.classList.add('graph-axis-label')
             rightLabel.textContent = `+${Math.ceil(maxAbsValue)}`
             svg.appendChild(rightLabel)
             
             const centerLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text')
             centerLabel.setAttribute('x', centerX)
-            centerLabel.setAttribute('y', svgHeight - 5)
+            centerLabel.setAttribute('y', graphEndY)
             centerLabel.classList.add('graph-axis-label')
             centerLabel.textContent = '.500'
             svg.appendChild(centerLabel)
